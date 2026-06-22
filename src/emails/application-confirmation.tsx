@@ -46,7 +46,7 @@ export default function ApplicationConfirmationEmail({ firstName }: Props) {
             </Section>
 
             <Text style={text}>
-              If you have any questions in the meantime, please don't hesitate
+              If you have any questions in the meantime, please don&apos;t hesitate
               to contact us.
             </Text>
 

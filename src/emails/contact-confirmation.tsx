@@ -19,7 +19,7 @@ export default function ContactConfirmationEmail({ name }: Props) {
     <Html>
       <Head />
       <Preview>
-        We've received your message — Bags of Groceries Tasmania
+        We&apos;ve received your message — Bags of Groceries Tasmania
       </Preview>
       <Body style={body}>
         <Container style={container}>
@@ -32,7 +32,7 @@ export default function ContactConfirmationEmail({ name }: Props) {
               Thanks for getting in touch, {name}!
             </Heading>
             <Text style={text}>
-              We've received your message and will get back to you as soon as
+              We&apos;ve received your message and will get back to you as soon as
               possible — usually within 1–2 business days.
             </Text>
             <Text style={text}>
