@@ -10,7 +10,7 @@ export function WhoWeAre() {
           <div className="relative">
             <div className="overflow-hidden rounded-2xl shadow-xl">
               <Image
-                src="/founders.jpg"
+                src="/founders.webp"
                 alt="Sunny Beatson and Raquel Cuevas, founders of Bags of Groceries Tasmania"
                 width={600}
                 height={450}
