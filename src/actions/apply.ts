@@ -3,7 +3,7 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { resend, FROM_EMAIL } from '@/lib/resend'
+import { getResend, FROM_EMAIL } from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { applicationSchema } from '@/lib/validations'
 import ApplicationConfirmationEmail from '@/emails/application-confirmation'
@@ -62,7 +62,7 @@ export async function submitApplication(
   }
 
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: data.email,
       subject: 'Your application has been received — Bags of Groceries Tasmania',
