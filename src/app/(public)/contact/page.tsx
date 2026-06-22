@@ -16,7 +16,8 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-lg text-muted-foreground">
-            Have a question or want to learn more? We&apos;d love to hear from you.
+            It&apos;s just us — Sunny and Raquel. Send us a message and
+            we&apos;ll get back to you.
           </p>
         </div>
 
@@ -48,7 +49,7 @@ export default function ContactPage() {
                       Location
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Tasmania, Australia
+                      Launceston, Tasmania
                     </p>
                   </div>
                 </div>
@@ -61,7 +62,7 @@ export default function ContactPage() {
                       Response Time
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      Within 1–2 business days
+                      Usually within a day or two
                     </p>
                   </div>
                 </div>
@@ -69,10 +70,10 @@ export default function ContactPage() {
             </div>
 
             <div className="rounded-xl bg-primary p-6 text-white">
-              <h3 className="mb-2 font-semibold">Need urgent assistance?</h3>
+              <h3 className="mb-2 font-semibold">Need help right now?</h3>
               <p className="mb-4 text-sm text-primary-foreground/80">
-                If your family needs immediate support, please submit an
-                assistance application and we will prioritise your request.
+                If your family needs groceries urgently, put in an application
+                and let us know — we&apos;ll do our best to move quickly.
               </p>
               <a
                 href="/apply"

@@ -25,13 +25,13 @@ export function Hero() {
           </h1>
 
           <p className="mb-4 text-lg text-muted-foreground sm:text-xl">
-            Support Tasmanian families experiencing hardship by sponsoring
-            grocery bags filled with everyday essentials.
+            We&apos;re two locals from Launceston who want to help Tasmanian
+            families doing it tough — starting with something simple: groceries.
           </p>
 
           <p className="mb-10 text-base text-muted-foreground">
-            Every sponsorship helps deliver practical support to households
-            when they need it most.
+            Sponsor a bag and we&apos;ll make sure it gets to a family that
+            needs it.
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

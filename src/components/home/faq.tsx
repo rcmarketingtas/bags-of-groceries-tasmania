@@ -7,29 +7,29 @@ import {
 
 const faqs = [
   {
-    question: 'Who is eligible to apply for assistance?',
+    question: 'Who can apply for assistance?',
     answer:
-      'Bags of Groceries Tasmania supports Tasmanian families experiencing financial hardship. This includes families facing unemployment, unexpected medical expenses, domestic difficulties, or other circumstances that have impacted their ability to afford groceries. Applications are assessed on a case-by-case basis.',
+      'Anyone in Tasmania who is doing it tough. We\u2019re not here to judge — if your family is struggling to put food on the table right now, just put in an application and we\u2019ll have a look. Things like job loss, unexpected bills, or a rough patch in life are all totally valid.',
   },
   {
     question: 'How much does it cost to sponsor a bag?',
     answer:
-      'You can sponsor one grocery bag for $25 or two bags for $50. 100% of your donation goes directly toward providing groceries for families in need. Payments are processed securely through Stripe.',
+      '$25 sponsors one bag, $50 sponsors two. Every dollar goes toward buying actual groceries — nothing gets taken out for admin or fees.',
   },
   {
-    question: 'What is included in a grocery bag?',
+    question: 'What\u2019s in a grocery bag?',
     answer:
-      'Each grocery bag is prepared by our supermarket partner and contains a selection of essential items — including fresh produce, pantry staples, protein, and household necessities. The contents are designed to provide meaningful support to a family.',
+      'The basics that a family needs — fresh fruit and veg, pantry staples like pasta, rice and tinned food, and everyday household essentials. We keep it practical.',
   },
   {
-    question: 'How long does it take for my application to be reviewed?',
+    question: 'How long will my application take?',
     answer:
-      'Applications are typically reviewed within 3–5 business days. You will receive an email confirmation when your application is submitted, and our team will contact you directly once a decision has been made.',
+      'We try to get back to everyone within a few days. You\u2019ll get a confirmation email straight away when you apply, and we\u2019ll reach out once we\u2019ve had a chance to review it.',
   },
   {
-    question: 'Is my donation tax deductible?',
+    question: 'Can I apply if I\u2019m not in Launceston?',
     answer:
-      'Please contact us directly for information regarding tax deductibility, as this depends on current registration status. We recommend consulting your tax adviser for personalised advice.',
+      'Yes — we\u2019re based in Launceston but we want to help families right across Tassie. Apply no matter where you are and we\u2019ll do our best to help.',
   },
 ]
 
@@ -39,11 +39,10 @@ export function FAQ() {
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Frequently Asked Questions
+            Common Questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to know about sponsoring bags and applying for
-            assistance.
+            If you can&apos;t find what you&apos;re after, just flick us a message.
           </p>
         </div>
 

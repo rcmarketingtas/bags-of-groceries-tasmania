@@ -30,28 +30,26 @@ export function WhoWeAre() {
             </div>
 
             <h2 className="mb-6 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Two Tasmanians who wanted to do something real
+              Started by two locals from Launceston
             </h2>
 
             <div className="space-y-4 text-base leading-relaxed text-muted-foreground">
               <p>
-                Bags of Groceries Tasmania was started by Sunny Beatson and
-                Raquel Cuevas — two locals who saw an increasing need for
-                support within their community and wanted to do something real
-                about it.
+                We&apos;re Sunny and Raquel — we grew up here in Tassie and
+                we&apos;ve watched more and more families around us struggle to
+                get by. We wanted to actually do something about it, not just
+                talk about it.
               </p>
               <p>
-                It started small. When we helped raise money for Constable
-                Keith Smith by selling donuts, the response from the community
-                blew us away. The positivity, the connection, the sense that
-                people genuinely wanted to help each other — it lit something
-                up in us.
+                It started when we sold donuts to raise money for Constable
+                Keith Smith. The way the community showed up blew us away —
+                the generosity, the warmth, the fact that people just wanted to
+                help. That feeling stuck with us.
               </p>
               <p>
-                We wanted to take that feeling and build something bigger with
-                it. Something that brings Tasmanians together, puts food on
-                tables, and makes this island a better place for the people who
-                call it home.
+                So we thought: what if we could do that on a bigger scale? No
+                big organisation behind us — just the two of us, trying to make
+                sure families across Tassie have food on the table.
               </p>
             </div>
           </div>

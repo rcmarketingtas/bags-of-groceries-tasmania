@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, Target, Users, ShoppingBag, CheckCircle } from 'lucide-react'
+import { ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
   title: 'About Us',
   description:
-    'Learn about the mission, vision, and community impact of Bags of Groceries Tasmania.',
+    'Bags of Groceries Tasmania — started by two locals from Launceston who wanted to help families doing it tough.',
 }
 
 export default function AboutPage() {
@@ -18,80 +19,81 @@ export default function AboutPage() {
           <ShoppingBag className="mx-auto mb-4 h-12 w-12 opacity-80" />
           <h1 className="mb-4 text-4xl font-bold sm:text-5xl">About Us</h1>
           <p className="text-lg text-primary-foreground/80">
-            Bags of Groceries Tasmania was founded on a simple belief: no
-            Tasmanian family should go without food.
+            Two locals from Launceston who wanted to do more than just talk
+            about the problem.
           </p>
         </div>
       </section>
 
-      {/* Mission & Vision */}
+      {/* Our story */}
       <section className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2">
-            <div className="rounded-2xl border bg-white p-8 shadow-sm">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <Heart className="h-6 w-6 text-primary" />
-              </div>
-              <h2 className="mb-3 text-2xl font-bold text-gray-900">
-                Our Mission
-              </h2>
-              <p className="leading-relaxed text-muted-foreground">
-                To provide immediate, dignified grocery assistance to Tasmanian
-                families experiencing hardship — connecting the generosity of
-                community sponsors with families who need support most.
-              </p>
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+            <div className="overflow-hidden rounded-2xl shadow-xl">
+              <Image
+                src="/founders.webp"
+                alt="Sunny Beatson and Raquel Cuevas"
+                width={600}
+                height={450}
+                className="h-auto w-full object-cover"
+              />
             </div>
 
-            <div className="rounded-2xl border bg-white p-8 shadow-sm">
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-secondary/10">
-                <Target className="h-6 w-6 text-secondary" />
-              </div>
-              <h2 className="mb-3 text-2xl font-bold text-gray-900">
-                Our Vision
+            <div className="space-y-5 text-base leading-relaxed text-muted-foreground">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                Our Story
               </h2>
-              <p className="leading-relaxed text-muted-foreground">
-                A Tasmania where every family has access to nutritious food,
-                and where community members look after one another during
-                difficult times. We envision a network of support that spans
-                the entire island.
+              <p>
+                We&apos;re Sunny Beatson and Raquel Cuevas — two young people
+                from Launceston who grew up watching hardship affect people
+                around us. Not strangers. Neighbours, friends, families we
+                knew.
+              </p>
+              <p>
+                For a while we didn&apos;t know what to do about it. Then we
+                started selling donuts to raise money for Constable Keith
+                Smith. The response from the community was something we
+                weren&apos;t prepared for. People gave generously, they showed
+                up, and for a moment it felt like Tassie was pulling together.
+                That experience changed how we thought about what was possible.
+              </p>
+              <p>
+                We thought: if people will come together for donuts, imagine
+                what they&apos;d do for groceries. For families who are genuinely
+                going without. So we built this — no big backing, no grants,
+                just the two of us trying to connect people who want to give
+                with families who need a hand.
+              </p>
+              <p>
+                We&apos;re based in Launceston but this is for all of Tassie.
+                If you&apos;re doing it tough, reach out. If you want to help,
+                sponsor a bag. It&apos;s really that simple.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Community Impact */}
+      {/* What we believe */}
       <section className="bg-gray-50 py-20">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
-            <Users className="mx-auto mb-4 h-10 w-10 text-primary" />
-            <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
-              Community Impact
-            </h2>
-            <p className="mb-8 text-lg text-muted-foreground">
-              Every bag sponsored creates a direct, tangible impact in the
-              lives of Tasmanian families. Hardship can affect anyone — from
-              sudden job loss to medical emergencies or unexpected financial
-              stress.
-            </p>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-              {[
-                { value: '$25', label: 'sponsors one full grocery bag' },
-                { value: '$50', label: 'supports a family for the week' },
-                { value: '100%', label: 'of donations fund groceries' },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-xl bg-white p-6 shadow-sm"
-                >
-                  <div className="mb-2 text-3xl font-bold text-primary">
-                    {item.value}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-8 text-3xl font-bold tracking-tight text-gray-900">
+            What we believe
+          </h2>
+          <ul className="space-y-4">
+            {[
+              'Nobody in Tasmania should go without food.',
+              'Asking for help takes courage — we\u2019ll never make it harder than it needs to be.',
+              'Every dollar that comes in goes toward actual groceries, nothing else.',
+              'Communities are stronger when people look out for each other.',
+              'This doesn\u2019t need to be complicated — just people helping people.',
+            ].map((belief) => (
+              <li key={belief} className="flex items-start gap-3">
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                <span className="text-muted-foreground">{belief}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -99,34 +101,34 @@ export default function AboutPage() {
       <section className="py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-10 text-center text-3xl font-bold text-gray-900">
-            How the Program Works
+            How it works
           </h2>
           <div className="space-y-6">
             {[
               {
-                title: 'Sponsors fund bags',
+                title: 'Someone sponsors a bag',
                 description:
-                  'Generous community members visit our website and choose to sponsor one or two grocery bags. Payments are processed securely through Stripe.',
+                  'A generous person — maybe you — visits the site and pays for one or two grocery bags.',
               },
               {
-                title: 'Families apply',
+                title: 'A family applies',
                 description:
-                  'Tasmanian families experiencing hardship submit an application through our website. All applications are reviewed confidentially by our team.',
+                  'Families doing it tough fill in a short application. We keep it simple — no jumping through hoops.',
               },
               {
-                title: 'Applications are reviewed',
+                title: 'We review it',
                 description:
-                  'Our administrators review each application carefully, considering the family\'s circumstances, size, and current situation.',
+                  'Sunny and Raquel go through each application personally. We treat every one with respect.',
               },
               {
-                title: 'Groceries are prepared',
+                title: 'Groceries get packed',
                 description:
-                  'Approved families are matched with sponsored bags. Our supermarket partner prepares full grocery bags with essential items.',
+                  'We put together bags with the basics — fresh produce, pantry staples, everyday essentials.',
               },
               {
-                title: 'Families receive support',
+                title: 'The family gets their groceries',
                 description:
-                  'Grocery bags are provided to families, giving them immediate relief and the dignity of knowing their community cares.',
+                  'That\u2019s it. Food on the table. That\u2019s what this is all about.',
               },
             ].map((step, index) => (
               <div key={index} className="flex items-start gap-4">
@@ -148,11 +150,9 @@ export default function AboutPage() {
       {/* CTA */}
       <section className="bg-primary py-16 text-center text-white">
         <div className="mx-auto max-w-2xl px-4">
-          <CheckCircle className="mx-auto mb-4 h-10 w-10 opacity-80" />
-          <h2 className="mb-4 text-3xl font-bold">Ready to Help?</h2>
+          <h2 className="mb-4 text-3xl font-bold">Want to get involved?</h2>
           <p className="mb-8 text-primary-foreground/80">
-            Join our community of sponsors and help put food on the table for
-            Tasmanian families.
+            Sponsor a bag or reach out — we&apos;d love to hear from you.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button
@@ -168,7 +168,7 @@ export default function AboutPage() {
               variant="outline"
               className="border-white text-white hover:bg-white/10"
             >
-              <Link href="/apply">Apply for Assistance</Link>
+              <Link href="/contact">Get in Touch</Link>
             </Button>
           </div>
         </div>

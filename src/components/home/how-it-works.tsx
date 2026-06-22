@@ -5,19 +5,19 @@ const steps = [
     icon: ShoppingBag,
     title: 'Sponsor a Grocery Bag',
     description:
-      'Choose to sponsor one or more grocery bags. Your contribution helps fund essential groceries for a Tasmanian household experiencing hardship.',
+      'Pick how many bags you want to sponsor. Your money goes straight toward buying groceries for a Tassie family doing it tough.',
   },
   {
     icon: Package,
     title: 'Groceries Are Packed',
     description:
-      'Essential groceries are packed with a selection of pantry staples, fresh produce and household necessities.',
+      'We put together bags filled with the basics — fresh produce, pantry staples, and everyday household essentials.',
   },
   {
     icon: Heart,
     title: 'Families Receive Support',
     description:
-      'Approved families receive their grocery bags, providing immediate relief and helping put food on the table during difficult times.',
+      'Families we\u2019ve approved get their bags. Simple as that — real food, real help, right here in Tasmania.',
   },
 ]
 
