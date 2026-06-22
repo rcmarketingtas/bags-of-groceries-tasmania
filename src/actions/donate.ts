@@ -35,24 +35,23 @@ export async function createCheckoutSession(
   const { firstName, lastName, email, message, priceId } = result.data
 
   if (!VALID_PRICE_IDS().includes(priceId)) {
-    return { error: 'Invalid sponsorship package selected.' }
+    return { error: 'Invalid product selected.' }
   }
 
-  const product = Object.values(STRIPE_PRODUCTS).find(
-    (p) => p.priceId === priceId,
-  )!
+  const quantityRaw = parseInt((formData.get('quantity') as string) ?? '1', 10)
+  const quantity = isNaN(quantityRaw) || quantityRaw < 1 ? 1 : Math.min(quantityRaw, 10)
 
   try {
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{ price: priceId, quantity }],
       customer_email: email,
       metadata: {
         first_name: firstName,
         last_name: lastName,
         email,
         message: message ?? '',
-        bags: product.bags.toString(),
+        bags: quantity.toString(),
       },
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/sponsor`,

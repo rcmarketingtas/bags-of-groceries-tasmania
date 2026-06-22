@@ -12,14 +12,14 @@ const faqs = [
       'Anyone in Tasmania who is doing it tough. We\u2019re not here to judge — if your family is struggling to put food on the table right now, just put in an application and we\u2019ll have a look. Things like job loss, unexpected bills, or a rough patch in life are all totally valid.',
   },
   {
-    question: 'How much does it cost to sponsor a bag?',
+    question: 'How much does it cost?',
     answer:
-      '$25 sponsors one bag, $50 sponsors two. Every dollar goes toward buying actual groceries — nothing gets taken out for admin or fees.',
+      'It\'s $50 per bag. You can buy as many as you like — each one goes to a different family. Every dollar goes toward the groceries — nothing taken out for admin or fees.',
   },
   {
     question: 'What\u2019s in a grocery bag?',
     answer:
-      'The basics that a family needs — fresh fruit and veg, pantry staples like pasta, rice and tinned food, and everyday household essentials. We keep it practical.',
+      'Each bag includes fresh protein (chicken, seasonal cuts, or canned alternatives), pantry staples like rice, pasta and bread, fresh fruit and vegetables, and basic meal essentials like milk, sauce and legumes. Enough to support a small household for several days.',
   },
   {
     question: 'How long will my application take?',

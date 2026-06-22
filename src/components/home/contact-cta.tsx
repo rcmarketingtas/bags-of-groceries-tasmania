@@ -19,7 +19,7 @@ export function ContactCTA() {
           size="lg"
           className="bg-white text-primary hover:bg-gray-100"
         >
-          <Link href="/contact">Get in Touch</Link>
+          <Link href="/contact">Send Us a Message</Link>
         </Button>
       </div>
     </section>

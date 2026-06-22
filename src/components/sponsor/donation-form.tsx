@@ -1,52 +1,46 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { ShoppingBag, Check, Loader2, AlertCircle } from 'lucide-react'
+import { ShoppingBag, Minus, Plus, Loader2, AlertCircle, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
 import { createCheckoutSession } from '@/actions/donate'
 
-const packages = [
-  {
-    id: 'one-bag',
-    name: 'Sponsor 1 Bag',
-    price: '$25',
-    bags: 1,
-    description: 'Provide one full grocery bag to a Tasmanian family in need.',
-    priceIdEnv: 'NEXT_PUBLIC_STRIPE_PRICE_1_BAG',
-  },
-  {
-    id: 'two-bags',
-    name: 'Sponsor 2 Bags',
-    price: '$50',
-    bags: 2,
-    description: 'Double your impact — provide two bags to families in need.',
-    priceIdEnv: 'NEXT_PUBLIC_STRIPE_PRICE_2_BAGS',
-    popular: true,
-  },
+const BAG_PRICE = 50
+const MAX_BAGS = 10
+
+const BAG_CONTENTS = [
+  'Fresh protein (chicken, seasonal affordable cuts, or canned alternatives)',
+  'Pantry staples (rice, pasta, bread)',
+  'Fresh fruit and vegetables',
+  'Basic meal essentials (milk, sauce, legumes)',
 ]
 
 interface DonationFormProps {
-  price1BagId: string
-  price2BagsId: string
+  priceFamilyBagId: string
 }
 
-export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
-  const [selectedId, setSelectedId] = useState<string>('two-bags')
+export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
+  const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState<string>()
   const [isPending, startTransition] = useTransition()
 
-  const priceMap: Record<string, string> = {
-    'one-bag': price1BagId,
-    'two-bags': price2BagsId,
+  const total = quantity * BAG_PRICE
+
+  function decrement() {
+    setQuantity((q) => Math.max(1, q - 1))
+  }
+
+  function increment() {
+    setQuantity((q) => Math.min(MAX_BAGS, q + 1))
   }
 
   async function handleSubmit(formData: FormData) {
     setError(undefined)
-    formData.set('priceId', priceMap[selectedId] ?? '')
+    formData.set('priceId', priceFamilyBagId)
+    formData.set('quantity', quantity.toString())
 
     startTransition(async () => {
       const result = await createCheckoutSession(formData)
@@ -60,67 +54,77 @@ export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
 
   return (
     <div className="space-y-8">
-      {/* Package selection */}
+
+      {/* What's in the bag */}
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-5">
+        <h2 className="mb-3 font-semibold text-gray-900">
+          What&apos;s in each bag
+        </h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Your purchase provides a carefully selected mix of essential foods
+          designed to support a small household for several days.
+        </p>
+        <ul className="space-y-2">
+          {BAG_CONTENTS.map((item) => (
+            <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Quantity picker */}
       <div>
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          1. Choose your sponsorship
+          How many bags?
         </h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {packages.map((pkg) => {
-            const isSelected = selectedId === pkg.id
-            return (
-              <button
-                key={pkg.id}
-                type="button"
-                onClick={() => setSelectedId(pkg.id)}
-                className={cn(
-                  'relative rounded-xl border-2 p-5 text-left transition-all',
-                  isSelected
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-white hover:border-primary/50',
-                )}
-              >
-                {pkg.popular && (
-                  <span className="absolute -top-3 left-4 rounded-full bg-secondary px-3 py-0.5 text-xs font-semibold text-white">
-                    Most Popular
-                  </span>
-                )}
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={decrement}
+            disabled={quantity <= 1}
+            className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-white text-gray-700 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Remove one bag"
+          >
+            <Minus className="h-4 w-4" />
+          </button>
 
-                <div className="mb-3 flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShoppingBag
-                      className={cn(
-                        'h-5 w-5',
-                        isSelected ? 'text-primary' : 'text-muted-foreground',
-                      )}
-                    />
-                    <span className="font-semibold text-gray-900">
-                      {pkg.name}
-                    </span>
-                  </div>
-                  {isSelected && (
-                    <Check className="h-5 w-5 text-primary" />
-                  )}
-                </div>
+          <div className="text-center">
+            <span className="text-3xl font-bold text-gray-900">{quantity}</span>
+            <p className="text-xs text-muted-foreground">
+              {quantity === 1 ? 'bag' : 'bags'}
+            </p>
+          </div>
 
-                <div className="mb-2 text-3xl font-bold text-primary">
-                  {pkg.price}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {pkg.description}
-                </p>
-              </button>
-            )
-          })}
+          <button
+            type="button"
+            onClick={increment}
+            disabled={quantity >= MAX_BAGS}
+            className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-white text-gray-700 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Add one bag"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+
+          <div className="ml-4 border-l pl-4">
+            <p className="text-sm text-muted-foreground">
+              {quantity} × $50
+            </p>
+            <p className="text-2xl font-bold text-primary">
+              ${total}.00
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Donor details form */}
+      {/* Donor details */}
       <form action={handleSubmit} className="space-y-6">
-        <input type="hidden" name="priceId" value={priceMap[selectedId] ?? ''} />
+        <input type="hidden" name="priceId" value={priceFamilyBagId} />
+        <input type="hidden" name="quantity" value={quantity} />
 
         <h2 className="text-lg font-semibold text-gray-900">
-          2. Your details
+          Your details
         </h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -161,7 +165,7 @@ export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
         <div className="space-y-2">
           <Label htmlFor="message">
             Message{' '}
-            <span className="text-muted-foreground font-normal">(optional)</span>
+            <span className="font-normal text-muted-foreground">(optional)</span>
           </Label>
           <Textarea
             id="message"
@@ -193,14 +197,13 @@ export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
           ) : (
             <>
               <ShoppingBag className="h-4 w-4" />
-              Proceed to Secure Payment
+              Buy {quantity} {quantity === 1 ? 'Bag' : 'Bags'} of Groceries — ${total}.00
             </>
           )}
         </Button>
 
         <p className="text-center text-xs text-muted-foreground">
-          Payments processed securely via Stripe. You will be redirected to
-          complete your payment.
+          Payments processed securely via Stripe.
         </p>
       </form>
     </div>

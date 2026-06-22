@@ -49,7 +49,7 @@ export function Header() {
             <Link href="/apply">Apply for Assistance</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href="/sponsor">Sponsor a Bag</Link>
+            <Link href="/sponsor">Buy a Bag</Link>
           </Button>
         </div>
 
@@ -93,7 +93,7 @@ export function Header() {
             </Button>
             <Button asChild className="w-full">
               <Link href="/sponsor" onClick={() => setMobileOpen(false)}>
-                Sponsor a Bag
+                Buy a Bag
               </Link>
             </Button>
           </div>

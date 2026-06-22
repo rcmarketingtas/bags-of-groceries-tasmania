@@ -26,7 +26,7 @@ export function Hero() {
             <Button asChild size="lg" className="w-full sm:w-auto">
               <Link href="/sponsor">
                 <ShoppingBag className="h-5 w-5" />
-                Sponsor a Bag
+                Buy a Bag of Groceries
               </Link>
             </Button>
             <Button
@@ -45,7 +45,7 @@ export function Hero() {
           {/* Impact stats */}
           <div className="mt-16 grid grid-cols-3 gap-8 border-t pt-12">
             {[
-              { icon: ShoppingBag, value: '$25', label: 'Sponsors a grocery bag' },
+              { icon: ShoppingBag, value: '$50', label: 'Buys a family\'s groceries' },
               { icon: MapPin, value: 'Local', label: 'Supporting Tasmanian families' },
               { icon: Eye, value: 'Transparent', label: 'Community-driven grocery assistance' },
             ].map((stat) => (
