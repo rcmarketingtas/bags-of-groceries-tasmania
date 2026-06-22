@@ -27,7 +27,7 @@ export async function submitApplication(
     return { error: result.error.errors[0].message }
   }
 
-  const { confirmed: _, ...data } = result.data
+  const { confirmed: _confirmed, ...data } = result.data
 
   const supabase = await createClient()
 
