@@ -35,7 +35,7 @@ interface DonationFormProps {
 }
 
 export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
-  const [selectedPriceId, setSelectedPriceId] = useState(price2BagsId)
+  const [selectedId, setSelectedId] = useState<string>('two-bags')
   const [error, setError] = useState<string>()
   const [isPending, startTransition] = useTransition()
 
@@ -46,7 +46,7 @@ export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
 
   async function handleSubmit(formData: FormData) {
     setError(undefined)
-    formData.set('priceId', selectedPriceId)
+    formData.set('priceId', priceMap[selectedId] ?? '')
 
     startTransition(async () => {
       const result = await createCheckoutSession(formData)
@@ -67,13 +67,12 @@ export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {packages.map((pkg) => {
-            const priceId = priceMap[pkg.id]
-            const isSelected = selectedPriceId === priceId
+            const isSelected = selectedId === pkg.id
             return (
               <button
                 key={pkg.id}
                 type="button"
-                onClick={() => setSelectedPriceId(priceId)}
+                onClick={() => setSelectedId(pkg.id)}
                 className={cn(
                   'relative rounded-xl border-2 p-5 text-left transition-all',
                   isSelected
@@ -118,7 +117,7 @@ export function DonationForm({ price1BagId, price2BagsId }: DonationFormProps) {
 
       {/* Donor details form */}
       <form action={handleSubmit} className="space-y-6">
-        <input type="hidden" name="priceId" value={selectedPriceId} />
+        <input type="hidden" name="priceId" value={priceMap[selectedId] ?? ''} />
 
         <h2 className="text-lg font-semibold text-gray-900">
           2. Your details
