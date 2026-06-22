@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X, ShoppingBag } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { HeroCTAs } from '@/components/home/hero-ctas'
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -44,22 +44,8 @@ export function Header() {
         </nav>
 
         {/* Desktop CTAs */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Button
-            asChild
-            size="sm"
-            className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
-          >
-            <Link href="/sponsor">Buy a Bag of Groceries</Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="border-[#D5E0DA] text-[#1c4d31] hover:bg-[#F4F7F5] hover:text-[#1c4d31]"
-          >
-            <Link href="/apply">Apply for Assistance</Link>
-          </Button>
+        <div className="hidden md:flex">
+          <HeroCTAs layout="row" size="sm" variant="light" />
         </div>
 
         {/* Mobile menu toggle */}
@@ -94,24 +80,13 @@ export function Header() {
               {link.label}
             </Link>
           ))}
-          <div className="mt-3 flex flex-col gap-2 border-t border-[#D5E0DA] pt-3">
-            <Button
-              asChild
-              className="w-full bg-[#1c4d31] text-white hover:bg-[#163d27]"
-            >
-              <Link href="/sponsor" onClick={() => setMobileOpen(false)}>
-                Buy a Bag of Groceries
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full border-[#D5E0DA] text-[#1c4d31] hover:bg-[#F4F7F5]"
-            >
-              <Link href="/apply" onClick={() => setMobileOpen(false)}>
-                Apply for Assistance
-              </Link>
-            </Button>
+          <div className="mt-3 border-t border-[#D5E0DA] pt-3">
+            <HeroCTAs
+              layout="column"
+              size="sm"
+              variant="light"
+              onNavigate={() => setMobileOpen(false)}
+            />
           </div>
         </nav>
       </div>

@@ -90,10 +90,10 @@ export default function ThankYouPage() {
               href={FB_SHARE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-glow inline-flex items-center gap-2 rounded-lg bg-[#1877F2] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1565C0]"
+              aria-label="Share on Facebook"
+              className="btn-glow inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[#1877F2] text-white transition-all hover:bg-[#1565C0]"
             >
-              <Facebook className="h-4 w-4" />
-              Share on Facebook
+              <Facebook className="h-5 w-5" />
             </a>
           </div>
         </div>

@@ -26,7 +26,7 @@ export function Footer() {
               className="inline-flex items-center gap-1.5 text-sm text-[#A3C2B2] transition-colors hover:text-white"
             >
               <Facebook className="h-4 w-4" />
-              Follow us on Facebook
+              Follow our Journey on Facebook
             </a>
           </div>
 

@@ -47,7 +47,7 @@ export default async function SponsorPage() {
                 rel="noopener noreferrer"
                 className="font-medium text-white underline underline-offset-2 transition-opacity hover:opacity-75"
               >
-                Follow us on Facebook
+                Follow our Journey on Facebook
               </a>
               <span className="text-[#A3C2B2]"> to see the impact.</span>
             </div>
