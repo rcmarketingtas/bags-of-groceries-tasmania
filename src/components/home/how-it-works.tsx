@@ -1,26 +1,23 @@
-import { CreditCard, ShoppingCart, Home } from 'lucide-react'
+import { ShoppingBag, Package, Heart } from 'lucide-react'
 
 const steps = [
   {
-    icon: CreditCard,
-    step: '01',
+    icon: ShoppingBag,
     title: 'Sponsor a Grocery Bag',
     description:
-      'Choose to sponsor one or two grocery bags for $25 or $50. Your secure payment goes directly to funding groceries for a Tasmanian family.',
+      'Choose to sponsor one or more grocery bags. Your contribution helps fund essential groceries for a Tasmanian household experiencing hardship.',
   },
   {
-    icon: ShoppingCart,
-    step: '02',
-    title: 'Groceries Are Prepared',
+    icon: Package,
+    title: 'Groceries Are Packed',
     description:
-      'Our supermarket partner prepares a full grocery bag filled with essential items — fresh produce, staples, and household necessities.',
+      'Essential groceries are packed with a selection of pantry staples, fresh produce and household necessities.',
   },
   {
-    icon: Home,
-    step: '03',
+    icon: Heart,
     title: 'Families Receive Support',
     description:
-      'Approved families receive their grocery bags, providing immediate relief and dignity during a difficult time in their lives.',
+      'Approved families receive their grocery bags, providing immediate relief and helping put food on the table during difficult times.',
   },
 ]
 
@@ -32,15 +29,11 @@ export function HowItWorks() {
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             How It Works
           </h2>
-          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            A simple, transparent process that connects generous sponsors with
-            Tasmanian families in need.
-          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           {steps.map((step, index) => (
-            <div key={step.step} className="relative text-center">
+            <div key={step.title} className="relative text-center">
               {/* Connector line */}
               {index < steps.length - 1 && (
                 <div className="absolute left-1/2 top-8 hidden h-0.5 w-full -translate-y-1/2 bg-primary/20 md:block" />
@@ -54,9 +47,9 @@ export function HowItWorks() {
               </div>
 
               <h3 className="mb-3 text-xl font-semibold text-gray-900">
-                {step.title}
+                {index + 1}. {step.title}
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="leading-relaxed text-muted-foreground">
                 {step.description}
               </p>
             </div>

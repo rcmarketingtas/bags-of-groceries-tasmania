@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Heart, Users } from 'lucide-react'
+import { ShoppingBag, Users, MapPin, Eye } from 'lucide-react'
 
 export function Hero() {
   return (
@@ -15,7 +15,7 @@ export function Hero() {
         <div className="mx-auto max-w-3xl text-center">
           {/* Badge */}
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            <Heart className="h-3.5 w-3.5 fill-primary" />
+            <ShoppingBag className="h-3.5 w-3.5" />
             Supporting Tasmanian Families
           </div>
 
@@ -24,16 +24,20 @@ export function Hero() {
             <span className="text-primary"> on the Table</span>
           </h1>
 
-          <p className="mb-10 text-lg text-muted-foreground sm:text-xl">
+          <p className="mb-4 text-lg text-muted-foreground sm:text-xl">
             Support Tasmanian families experiencing hardship by sponsoring
-            grocery bags. Every contribution makes a real difference in
-            someone&apos;s life.
+            grocery bags filled with everyday essentials.
+          </p>
+
+          <p className="mb-10 text-base text-muted-foreground">
+            Every sponsorship helps deliver practical support to households
+            when they need it most.
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button asChild size="lg" className="w-full sm:w-auto">
               <Link href="/sponsor">
-                <Heart className="h-5 w-5" />
+                <ShoppingBag className="h-5 w-5" />
                 Sponsor a Bag
               </Link>
             </Button>
@@ -50,15 +54,16 @@ export function Hero() {
             </Button>
           </div>
 
-          {/* Stats */}
+          {/* Impact stats */}
           <div className="mt-16 grid grid-cols-3 gap-8 border-t pt-12">
             {[
-              { value: '$25', label: 'sponsors one bag' },
-              { value: '100%', label: 'goes to families' },
-              { value: 'TAS', label: 'families supported' },
+              { icon: ShoppingBag, value: '$25', label: 'Sponsors a grocery bag' },
+              { icon: MapPin, value: 'Local', label: 'Supporting Tasmanian families' },
+              { icon: Eye, value: 'Transparent', label: 'Community-driven grocery assistance' },
             ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl font-bold text-primary sm:text-3xl">
+              <div key={stat.value} className="text-center">
+                <stat.icon className="mx-auto mb-2 h-5 w-5 text-primary" />
+                <div className="text-xl font-bold text-primary sm:text-2xl">
                   {stat.value}
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground sm:text-sm">
