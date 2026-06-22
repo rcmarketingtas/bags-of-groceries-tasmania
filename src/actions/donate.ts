@@ -1,7 +1,7 @@
 'use server'
 
 import { headers } from 'next/headers'
-import { stripe, STRIPE_PRODUCTS } from '@/lib/stripe'
+import { getStripe, STRIPE_PRODUCTS } from '@/lib/stripe'
 import { rateLimit } from '@/lib/rate-limit'
 import { donationSchema } from '@/lib/validations'
 
@@ -43,7 +43,7 @@ export async function createCheckoutSession(
   )!
 
   try {
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: email,
