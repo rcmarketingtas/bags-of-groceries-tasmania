@@ -27,7 +27,8 @@ export async function submitApplication(
     return { error: result.error.errors[0].message }
   }
 
-  const { confirmed: _confirmed, ...data } = result.data
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { confirmed, ...data } = result.data
 
   const supabase = await createClient()
 
