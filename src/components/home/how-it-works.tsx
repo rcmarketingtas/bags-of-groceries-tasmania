@@ -11,19 +11,19 @@ const steps = [
     icon: Package,
     title: 'Groceries Are Packed',
     description:
-      'We put together bags filled with the basics — fresh produce, pantry staples, and everyday household essentials.',
+      'We put together bags filled with the basics: fresh produce, pantry staples, and everyday household essentials.',
   },
   {
     icon: Heart,
     title: 'Families Receive Support',
     description:
-      'Families we\u2019ve approved get their bags. Simple as that — real food, real help, right here in Tasmania.',
+      'Families we\u2019ve approved get their bags. Simple as that. Real food, real help, right here in Tasmania.',
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-20">
+    <section className="bg-white py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">

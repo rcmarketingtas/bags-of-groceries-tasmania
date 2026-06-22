@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
-import { Nunito } from 'next/font/google'
+import { Open_Sans, Dancing_Script } from 'next/font/google'
 import './globals.css'
 
-const nunito = Nunito({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+const openSans = Open_Sans({ subsets: ['latin'], variable: '--font-body', display: 'swap' })
+const dancingScript = Dancing_Script({ subsets: ['latin'], weight: ['700'], variable: '--font-heading', display: 'swap' })
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bagsofgroceries.org.au'
 
@@ -59,7 +60,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-AU">
-      <body className={nunito.className}>{children}</body>
+      <body className={`${openSans.variable} ${dancingScript.variable} font-body`}>{children}</body>
     </html>
   )
 }

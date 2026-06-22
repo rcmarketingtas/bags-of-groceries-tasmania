@@ -9,12 +9,12 @@ const faqs = [
   {
     question: 'Who can apply for assistance?',
     answer:
-      'Anyone in Tasmania who is doing it tough. We\u2019re not here to judge — if your family is struggling to put food on the table right now, just put in an application and we\u2019ll have a look. Things like job loss, unexpected bills, or a rough patch in life are all totally valid.',
+      'Anyone in Tasmania who is doing it tough. We\u2019re not here to judge. If your family is struggling to put food on the table right now, just put in an application and we\u2019ll have a look. Things like job loss, unexpected bills, or a rough patch in life are all totally valid.',
   },
   {
     question: 'How much does it cost?',
     answer:
-      'It\'s $50 per bag. You can buy as many as you like — each one goes to a different family. Your $50 covers the cost of the groceries and running the program.',
+      'It\'s $50 per bag. You can buy as many as you like, each one goes to a different family. Your $50 covers the cost of the groceries and running the program.',
   },
   {
     question: 'What\u2019s in a grocery bag?',
@@ -29,13 +29,13 @@ const faqs = [
   {
     question: 'Can I apply if I\u2019m not in Launceston?',
     answer:
-      'Yes — we\u2019re based in Launceston but we want to help families right across Tassie. Apply no matter where you are and we\u2019ll do our best to help.',
+      'Yes, we\u2019re based in Launceston but we want to help families right across Tassie. Apply no matter where you are and we\u2019ll do our best to help.',
   },
 ]
 
 export function FAQ() {
   return (
-    <section className="bg-[#FDFAF7] py-20">
+    <section className="bg-[#FDFAF7] py-12">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">

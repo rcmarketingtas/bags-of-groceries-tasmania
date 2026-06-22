@@ -48,3 +48,24 @@
     @apply bg-background text-foreground antialiased;
   }
 }
+
+@layer utilities {
+  .dark-page {
+    background-color: #0f1a13;
+    color: #f0ede8;
+  }
+  .dark-page h1,
+  .dark-page h2,
+  .dark-page h3 {
+    color: #f0ede8;
+  }
+  .dark-page .text-muted-foreground {
+    color: #a8b8a0;
+  }
+  .dark-page .border-border {
+    border-color: #2a3d2e;
+  }
+  .dark-section {
+    background-color: #162019;
+  }
+}

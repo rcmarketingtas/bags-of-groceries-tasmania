@@ -16,7 +16,7 @@ export default function ContactPage() {
             Get in Touch
           </h1>
           <p className="text-lg text-muted-foreground">
-            It&apos;s just us — Sunny and Raquel. Send us a message and
+            It&apos;s just us, Sunny and Raquel. Send us a message and
             we&apos;ll get back to you.
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function ContactPage() {
               <h3 className="mb-2 font-semibold">Need help right now?</h3>
               <p className="mb-4 text-sm text-primary-foreground/80">
                 If your family needs groceries urgently, put in an application
-                and let us know — we&apos;ll do our best to move quickly.
+                and let us know and we&apos;ll do our best to move quickly.
               </p>
               <a
                 href="/apply"

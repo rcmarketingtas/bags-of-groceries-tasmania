@@ -9,6 +9,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        body: ['var(--font-body)', 'sans-serif'],
+        heading: ['var(--font-heading)', 'cursive'],
+      },
       colors: {
         primary: {
           DEFAULT: 'hsl(var(--primary))',

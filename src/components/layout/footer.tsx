@@ -16,7 +16,7 @@ export function Footer() {
               <span>Bags of Groceries Tasmania</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Two locals from Launceston trying to help.
+              We won&apos;t let Tassie go hungry tonight.
             </p>
           </div>
 

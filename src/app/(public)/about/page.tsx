@@ -7,26 +7,27 @@ import { Button } from '@/components/ui/button'
 export const metadata: Metadata = {
   title: 'About Us',
   description:
-    'Bags of Groceries Tasmania — started by two locals from Launceston who wanted to help families doing it tough.',
+    'Bags of Groceries Tasmania, started by two locals who wanted to help families doing it tough.',
 }
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="bg-primary py-20 text-center text-white">
+      <section className="dark-page py-20 text-center">
         <div className="mx-auto max-w-3xl px-4">
-          <ShoppingBag className="mx-auto mb-4 h-12 w-12 opacity-80" />
-          <h1 className="mb-4 text-4xl font-bold sm:text-5xl">About Us</h1>
-          <p className="text-lg text-primary-foreground/80">
-            Two locals from Launceston who wanted to do more than just talk
-            about the problem.
+          <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-green-400 opacity-80" />
+          <h1 className="font-heading mb-4 text-5xl text-white sm:text-6xl">
+            About Us
+          </h1>
+          <p className="text-lg text-white/60">
+            Two locals who wanted to do more than just talk about the problem.
           </p>
         </div>
       </section>
 
       {/* Our story */}
-      <section className="py-20">
+      <section className="dark-page py-14">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
             <div className="overflow-hidden rounded-2xl shadow-xl">
@@ -39,15 +40,14 @@ export default function AboutPage() {
               />
             </div>
 
-            <div className="space-y-5 text-base leading-relaxed text-muted-foreground">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            <div className="space-y-5 text-base leading-relaxed text-white/70">
+              <h2 className="font-heading text-3xl text-white sm:text-4xl">
                 Our Story
               </h2>
               <p>
-                We&apos;re Sunny Beatson and Raquel Cuevas — two young people
-                from Launceston who grew up watching hardship affect people
-                around us. Not strangers. Neighbours, friends, families we
-                knew.
+                We&apos;re Sunny Beatson and Raquel Cuevas. We saw more and
+                more families around us struggling to get by. Not strangers.
+                Neighbours, friends, families we knew.
               </p>
               <p>
                 For a while we didn&apos;t know what to do about it. Then we
@@ -59,15 +59,15 @@ export default function AboutPage() {
               </p>
               <p>
                 We thought: if people will come together for donuts, imagine
-                what they&apos;d do for groceries. For families who are genuinely
-                going without. So we built this — no big backing, no grants,
-                just the two of us trying to connect people who want to give
-                with families who need a hand.
+                what they&apos;d do for groceries. For families who are
+                genuinely going without. So we built this, no big backing, no
+                grants, just the two of us trying to connect people who want to
+                give with families who need a hand.
               </p>
               <p>
                 We&apos;re based in Launceston but this is for all of Tassie.
                 If you&apos;re doing it tough, reach out. If you want to help,
-                sponsor a bag. It&apos;s really that simple.
+                buy a bag of groceries. It&apos;s really that simple.
               </p>
             </div>
           </div>
@@ -75,22 +75,22 @@ export default function AboutPage() {
       </section>
 
       {/* What we believe */}
-      <section className="bg-[#FDFAF7] py-20">
+      <section className="dark-section py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-3xl font-bold tracking-tight text-gray-900">
+          <h2 className="font-heading mb-8 text-3xl text-white sm:text-4xl">
             What we believe
           </h2>
           <ul className="space-y-4">
             {[
               'Nobody in Tasmania should go without food.',
-              'Asking for help takes courage — we\u2019ll never make it harder than it needs to be.',
+              'Asking for help takes courage. We\u2019ll never make it harder than it needs to be.',
               'Every dollar that comes in goes toward actual groceries, nothing else.',
               'Communities are stronger when people look out for each other.',
-              'This doesn\u2019t need to be complicated — just people helping people.',
+              'This doesn\u2019t need to be complicated. Just people helping people.',
             ].map((belief) => (
               <li key={belief} className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                <span className="text-muted-foreground">{belief}</span>
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-green-400" />
+                <span className="text-white/70">{belief}</span>
               </li>
             ))}
           </ul>
@@ -98,22 +98,22 @@ export default function AboutPage() {
       </section>
 
       {/* How the program works */}
-      <section className="py-20">
+      <section className="dark-page py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-10 text-center text-3xl font-bold text-gray-900">
+          <h2 className="font-heading mb-10 text-center text-3xl text-white sm:text-4xl">
             How it works
           </h2>
           <div className="space-y-6">
             {[
               {
-                title: 'Someone sponsors a bag',
+                title: 'Someone buys a bag of groceries',
                 description:
-                  'A generous person — maybe you — visits the site and pays for one or two grocery bags.',
+                  'A generous person visits the site and pays for one or more grocery bags.',
               },
               {
                 title: 'A family applies',
                 description:
-                  'Families doing it tough fill in a short application. We keep it simple — no jumping through hoops.',
+                  'Families doing it tough fill in a short application. We keep it simple, no jumping through hoops.',
               },
               {
                 title: 'We review it',
@@ -123,7 +123,7 @@ export default function AboutPage() {
               {
                 title: 'Groceries get packed',
                 description:
-                  'We put together bags with the basics — fresh produce, pantry staples, everyday essentials.',
+                  'We put together bags with the basics: fresh produce, pantry staples, everyday essentials.',
               },
               {
                 title: 'The family gets their groceries',
@@ -132,14 +132,14 @@ export default function AboutPage() {
               },
             ].map((step, index) => (
               <div key={index} className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-white">
                   {index + 1}
                 </div>
                 <div>
-                  <h3 className="mb-1 font-semibold text-gray-900">
+                  <h3 className="mb-1 font-semibold text-white">
                     {step.title}
                   </h3>
-                  <p className="text-muted-foreground">{step.description}</p>
+                  <p className="text-white/60">{step.description}</p>
                 </div>
               </div>
             ))}
@@ -148,25 +148,28 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-primary py-16 text-center text-white">
+      <section className="dark-section py-16 text-center">
         <div className="mx-auto max-w-2xl px-4">
-          <h2 className="mb-4 text-3xl font-bold">Want to get involved?</h2>
-          <p className="mb-8 text-primary-foreground/80">
-            Sponsor a bag or reach out — we&apos;d love to hear from you.
+          <h2 className="font-heading mb-4 text-3xl text-white sm:text-4xl">
+            Want to get involved?
+          </h2>
+          <p className="mb-8 text-white/60">
+            Buy a bag of groceries or reach out. We&apos;d love to hear from
+            you.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary hover:bg-gray-100"
+              className="bg-green-500 text-white hover:bg-green-600"
             >
-              <Link href="/sponsor">Sponsor a Bag</Link>
+              <Link href="/sponsor">Buy a Bag of Groceries</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white text-white hover:bg-white/10"
+              className="border-white/30 text-white hover:bg-white/10"
             >
               <Link href="/contact">Get in Touch</Link>
             </Button>
