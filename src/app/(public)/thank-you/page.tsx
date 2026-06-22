@@ -1,12 +1,15 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { CheckCircle2, Heart, Share2 } from 'lucide-react'
+import { CheckCircle2, Heart, Facebook } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
   title: 'Thank You for Your Support',
   description: 'Your donation has been received. Thank you for supporting Tasmanian families.',
 }
+
+const SITE_URL = 'https://bagsofgroceries.org.au'
+const FB_SHARE_URL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent('I just bought a bag of groceries for a Tasmanian family in need. You can too!')}`
 
 export default function ThankYouPage() {
   return (
@@ -35,21 +38,15 @@ export default function ThankYouPage() {
             <h2 className="mb-4 font-semibold text-black">What happens next?</h2>
             <ul className="space-y-3 text-sm text-[#1c4d31]/80">
               <li className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]">
-                  1
-                </span>
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]">1</span>
                 You&apos;ll receive a donation receipt by email shortly.
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]">
-                  2
-                </span>
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]">2</span>
                 We&apos;ll pack a bag with the essentials for a Tasmanian family.
               </li>
               <li className="flex items-start gap-3">
-                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]">
-                  3
-                </span>
+                <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]">3</span>
                 An approved Tasmanian family will receive the groceries.
               </li>
             </ul>
@@ -77,14 +74,27 @@ export default function ThankYouPage() {
             </Button>
           </div>
 
-          {/* Share prompt */}
-          <div className="rounded-xl border border-[#D5E0DA] bg-[#F4F7F5] p-5">
-            <Share2 className="mx-auto mb-2 h-6 w-6 text-[#1c4d31]" />
-            <p className="text-sm font-medium text-black">Spread the word</p>
-            <p className="mt-1 text-sm text-[#1c4d31]/80">
-              Tell your friends and family about Bags of Groceries Tasmania.
-              Every share helps us reach more supporters.
+          {/* Facebook share */}
+          <div className="rounded-2xl border border-[#D5E0DA] bg-[#F4F7F5] p-7">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2]/10">
+              <Facebook className="h-6 w-6 text-[#1877F2]" />
+            </div>
+            <p className="mb-1 text-base font-semibold text-black">
+              Spread the word
             </p>
+            <p className="mb-5 text-sm text-[#1c4d31]/80">
+              Every share helps us reach more families who need support, and
+              more people who want to help.
+            </p>
+            <a
+              href={FB_SHARE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-glow inline-flex items-center gap-2 rounded-lg bg-[#1877F2] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#1565C0]"
+            >
+              <Facebook className="h-4 w-4" />
+              Share on Facebook
+            </a>
           </div>
         </div>
       </section>

@@ -47,18 +47,18 @@ export function Header() {
         <div className="hidden items-center gap-3 md:flex">
           <Button
             asChild
+            size="sm"
+            className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
+          >
+            <Link href="/sponsor">Buy a Bag of Groceries</Link>
+          </Button>
+          <Button
+            asChild
             variant="outline"
             size="sm"
             className="border-[#D5E0DA] text-[#1c4d31] hover:bg-[#F4F7F5] hover:text-[#1c4d31]"
           >
             <Link href="/apply">Apply for Assistance</Link>
-          </Button>
-          <Button
-            asChild
-            size="sm"
-            className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
-          >
-            <Link href="/sponsor">Buy a Bag of Groceries</Link>
           </Button>
         </div>
 
@@ -97,19 +97,19 @@ export function Header() {
           <div className="mt-3 flex flex-col gap-2 border-t border-[#D5E0DA] pt-3">
             <Button
               asChild
+              className="w-full bg-[#1c4d31] text-white hover:bg-[#163d27]"
+            >
+              <Link href="/sponsor" onClick={() => setMobileOpen(false)}>
+                Buy a Bag of Groceries
+              </Link>
+            </Button>
+            <Button
+              asChild
               variant="outline"
               className="w-full border-[#D5E0DA] text-[#1c4d31] hover:bg-[#F4F7F5]"
             >
               <Link href="/apply" onClick={() => setMobileOpen(false)}>
                 Apply for Assistance
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="w-full bg-[#1c4d31] text-white hover:bg-[#163d27]"
-            >
-              <Link href="/sponsor" onClick={() => setMobileOpen(false)}>
-                Buy a Bag of Groceries
               </Link>
             </Button>
           </div>

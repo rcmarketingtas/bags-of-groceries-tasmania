@@ -216,15 +216,18 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
 
       {/* Business sponsor */}
       <div className="border-t border-[#163d27] pt-6 text-center">
-        <p className="text-sm text-[#A3C2B2]">
-          Representing a business?{' '}
-          <a
-            href="/contact"
-            className="font-medium text-white underline underline-offset-2 transition-opacity hover:opacity-75"
-          >
-            Get in touch about a bulk order
-          </a>
+        <p className="mb-3 text-sm text-[#A3C2B2]">
+          Representing a business?
         </p>
+        <Button
+          asChild
+          variant="outline"
+          className="border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
+        >
+          <a href="/contact">
+            Get in touch about a bulk order or sponsorship
+          </a>
+        </Button>
       </div>
     </div>
   )

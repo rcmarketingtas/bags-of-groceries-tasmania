@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ShoppingBag } from 'lucide-react'
+import { ShoppingBag, Facebook } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -16,8 +16,18 @@ export function Footer() {
               <span>Bags of Groceries Tasmania</span>
             </Link>
             <p className="text-sm text-[#A3C2B2]">
-              We won&apos;t let Tassie go hungry tonight.
+              Feeding Tassie families, one bag at a time.
             </p>
+            {/* Facebook page link */}
+            <a
+              href="https://www.facebook.com/bagsofgroceriestasmania"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm text-[#A3C2B2] transition-colors hover:text-white"
+            >
+              <Facebook className="h-4 w-4" />
+              Follow us on Facebook
+            </a>
           </div>
 
           {/* Links */}
