@@ -34,10 +34,6 @@ export default async function SponsorPage() {
           <h1 className="mb-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Buy a Bag of Groceries for a Family
           </h1>
-          <p className="text-lg text-muted-foreground">
-            $50 per bag. Your purchase covers the cost of the groceries and
-            running the program.
-          </p>
         </div>
 
         {/* Transparency */}
