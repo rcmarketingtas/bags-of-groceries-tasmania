@@ -1,28 +1,95 @@
 import type { Metadata } from 'next'
-import { ShieldCheck, Lock } from 'lucide-react'
+import { ShieldCheck, Lock, ShoppingBag, Calendar, Facebook, Users } from 'lucide-react'
 import { DonationForm } from '@/components/sponsor/donation-form'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const metadata: Metadata = {
   title: 'Buy a Bag of Groceries',
   description:
-    'Buy a bag of groceries for a Tasmanian family doing it tough. $50 per bag — every dollar goes to the groceries.',
+    'Buy a bag of groceries for a Tasmanian family doing it tough. $50 per bag.',
 }
 
-export default function SponsorPage() {
+async function getTotalBagsDelivered(): Promise<number> {
+  try {
+    const supabase = createAdminClient()
+    const { data } = await supabase
+      .from('donations')
+      .select('bags')
+    if (!data) return 0
+    return data.reduce((sum, row) => sum + (row.bags ?? 0), 0)
+  } catch {
+    return 0
+  }
+}
+
+export default async function SponsorPage() {
   const priceFamilyBagId = process.env.STRIPE_PRICE_FAMILY_BAG!
+  const totalBags = await getTotalBagsDelivered()
+
+  const transparencyItems = [
+    {
+      icon: ShoppingBag,
+      title: `${totalBags} bags delivered so far`,
+      description: 'Every purchase is matched to a real family — nothing sits unspent.',
+    },
+    {
+      icon: Calendar,
+      title: 'We deliver every Sunday',
+      description: 'Bags purchased by Friday are included in that week\'s delivery.',
+    },
+    {
+      icon: Users,
+      title: 'Reviewed by Sunny & Raquel personally',
+      description: 'Every application is read and assessed by us — no algorithm, no middleman.',
+    },
+    {
+      icon: Facebook,
+      title: 'We post after every delivery',
+      description: (
+        <>
+          Follow along on{' '}
+          <a
+            href="https://www.facebook.com/bagsofgroceriestasmania"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-primary underline underline-offset-2 hover:text-primary/80"
+          >
+            Facebook
+          </a>{' '}
+          to see the impact.
+        </>
+      ),
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-[#FDFAF7] py-16">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-10 text-center">
+        <div className="mb-8 text-center">
           <h1 className="mb-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Buy a Bag of Groceries for a Family
           </h1>
           <p className="text-lg text-muted-foreground">
-            $50 per bag. Every dollar goes toward the groceries — nothing
-            taken out for admin or fees.
+            $50 per bag. Your purchase covers the cost of the groceries and
+            running the program.
           </p>
+        </div>
+
+        {/* Transparency strip */}
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {transparencyItems.map((item) => (
+            <div
+              key={item.title}
+              className="flex items-start gap-3 rounded-lg border border-border bg-white p-4"
+            >
+              <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+              <div>
+                <p className="text-sm font-semibold text-gray-900">{item.title}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Form card */}
