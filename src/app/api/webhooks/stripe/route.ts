@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import type Stripe from 'stripe'
+import Stripe from 'stripe'
 import { createElement } from 'react'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
