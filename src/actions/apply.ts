@@ -27,8 +27,18 @@ export async function submitApplication(
     return { error: result.error.errors[0].message }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { confirmed, ...data } = result.data
+  const data = {
+    firstName: result.data.firstName,
+    lastName: result.data.lastName,
+    email: result.data.email,
+    phone: result.data.phone,
+    address: result.data.address,
+    suburb: result.data.suburb,
+    postcode: result.data.postcode,
+    adults: result.data.adults,
+    children: result.data.children,
+    circumstances: result.data.circumstances,
+  }
 
   const supabase = await createClient()
 
