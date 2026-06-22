@@ -8,20 +8,20 @@ interface HeroProps {
 
 export function Hero({ familiesCount }: HeroProps) {
   return (
-    <section className="dark-page py-16 md:py-24">
+    <section className="py-20 md:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="font-heading mb-6 text-5xl tracking-tight text-white sm:text-6xl md:text-7xl">
+          <h1 className="mb-6 text-5xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl">
             Help Put Food
-            <span className="text-green-400"> on the Table</span>
+            <span className="text-[#3d6b51]"> on the Table</span>
           </h1>
 
-          <p className="mb-4 text-lg text-white/75 sm:text-xl">
+          <p className="mb-4 text-lg text-muted-foreground sm:text-xl">
             We&apos;re two locals who want to help Tasmanian families doing it
             tough, starting with something simple: groceries.
           </p>
 
-          <p className="mb-10 text-base text-white/60">
+          <p className="mb-10 text-base text-muted-foreground/80">
             Buy a bag and we&apos;ll make sure it gets to a family that needs
             it.
           </p>
@@ -30,7 +30,7 @@ export function Hero({ familiesCount }: HeroProps) {
             <Button
               asChild
               size="lg"
-              className="w-full bg-green-500 text-white hover:bg-green-600 sm:w-auto"
+              className="btn-glow w-full bg-[#3d6b51] text-white hover:bg-[#4a7d61] sm:w-auto"
             >
               <Link href="/sponsor">
                 <ShoppingBag className="h-5 w-5" />
@@ -41,7 +41,7 @@ export function Hero({ familiesCount }: HeroProps) {
               asChild
               variant="outline"
               size="lg"
-              className="w-full border-white/30 text-white hover:bg-white/10 sm:w-auto"
+              className="w-full border-white/15 bg-transparent text-white/80 hover:border-white/30 hover:bg-white/5 hover:text-white sm:w-auto"
             >
               <Link href="/apply">
                 <Users className="h-5 w-5" />
@@ -51,11 +51,11 @@ export function Hero({ familiesCount }: HeroProps) {
           </div>
 
           {/* Live counter */}
-          <div className="mt-14 border-t border-white/15 pt-10">
+          <div className="mt-16 border-t border-white/10 pt-12">
             <p className="text-5xl font-bold text-white">
               {familiesCount.toLocaleString()}
             </p>
-            <p className="mt-2 text-base text-white/60">
+            <p className="mt-2 text-base text-muted-foreground">
               Tasmanian families fed so far
             </p>
           </div>

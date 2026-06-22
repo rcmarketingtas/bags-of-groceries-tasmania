@@ -18,9 +18,9 @@ export function ApplicationForm() {
 
   if (state?.success) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-        <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-primary" />
-        <h2 className="mb-2 text-xl font-semibold text-gray-900">
+      <div className="rounded-xl border border-[#3d6b51]/30 bg-[#3d6b51]/10 p-8 text-center">
+        <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-[#3d6b51]" />
+        <h2 className="mb-2 text-xl font-semibold text-white">
           Application Submitted
         </h2>
         <p className="text-muted-foreground">
@@ -36,7 +36,7 @@ export function ApplicationForm() {
     <form action={formAction} className="space-y-6">
       {/* Personal details */}
       <div>
-        <h2 className="mb-4 text-base font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Personal Details
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -87,7 +87,7 @@ export function ApplicationForm() {
 
       {/* Address */}
       <div>
-        <h2 className="mb-4 text-base font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Address
         </h2>
         <div className="grid grid-cols-1 gap-4">
@@ -129,7 +129,7 @@ export function ApplicationForm() {
 
       {/* Family details */}
       <div>
-        <h2 className="mb-4 text-base font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Family Details
         </h2>
         <div className="grid grid-cols-2 gap-4">
@@ -162,7 +162,7 @@ export function ApplicationForm() {
 
       {/* Circumstances */}
       <div>
-        <h2 className="mb-4 text-base font-semibold uppercase tracking-wider text-muted-foreground">
+        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Your Circumstances
         </h2>
         <div className="space-y-2">
@@ -184,16 +184,16 @@ export function ApplicationForm() {
       </div>
 
       {/* Confirmation */}
-      <div className="rounded-lg border bg-gray-50 p-4">
+      <div className="rounded-lg border border-white/10 bg-white/5 p-4">
         <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
             name="confirmed"
             value="on"
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-primary"
+            className="mt-1 h-4 w-4 rounded border-white/20 text-primary"
             required
           />
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-muted-foreground">
             I confirm that the information provided in this application is
             accurate and truthful to the best of my knowledge.
           </span>

@@ -41,7 +41,7 @@ function ProgressDial({ quantity }: { quantity: number }) {
             cy="72"
             r={radius}
             fill="none"
-            stroke="#2a3d2e"
+            stroke="hsl(var(--border))"
             strokeWidth="12"
           />
           <circle
@@ -49,7 +49,7 @@ function ProgressDial({ quantity }: { quantity: number }) {
             cy="72"
             r={radius}
             fill="none"
-            stroke="#4ade80"
+            stroke="#3d6b51"
             strokeWidth="12"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -59,7 +59,7 @@ function ProgressDial({ quantity }: { quantity: number }) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-4xl font-bold text-white">{quantity}</span>
-          <span className="text-xs text-white/60">
+          <span className="text-xs text-muted-foreground">
             {quantity === 1 ? 'household' : 'households'}
           </span>
         </div>
@@ -71,7 +71,7 @@ function ProgressDial({ quantity }: { quantity: number }) {
           <div
             key={m}
             className={`flex items-center gap-1.5 transition-colors ${
-              quantity >= m ? 'text-green-400' : 'text-white/40'
+              quantity >= m ? 'text-[#3d6b51]' : 'text-muted-foreground/40'
             }`}
           >
             {quantity >= m ? (
@@ -125,11 +125,11 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
     <div className="space-y-8">
 
       {/* What's in the bag */}
-      <div className="rounded-lg border border-green-400/20 bg-green-400/5 p-5">
+      <div className="rounded-xl border border-[#3d6b51]/20 bg-[#3d6b51]/5 p-5">
         <h2 className="mb-3 font-semibold text-white">
           What&apos;s in each bag
         </h2>
-        <p className="mb-3 text-sm text-white/60">
+        <p className="mb-3 text-sm text-muted-foreground">
           A carefully selected mix of essential foods to support a small
           household for several days.
         </p>
@@ -137,9 +137,9 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
           {BAG_CONTENTS.map((item) => (
             <li
               key={item}
-              className="flex items-start gap-2 text-sm text-white/70"
+              className="flex items-start gap-2 text-sm text-muted-foreground"
             >
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-400" />
+              <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#3d6b51]" />
               {item}
             </li>
           ))}
@@ -159,23 +159,24 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
             type="button"
             onClick={decrement}
             disabled={quantity <= 1}
-            className="flex h-11 w-11 items-center justify-center rounded-md border border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Remove one bag"
           >
             <Minus className="h-4 w-4" />
           </button>
 
-          <div className="min-w-[80px] text-center">
-            <p className="text-sm text-white/60">
-              {quantity} × $50 = <span className="text-xl font-bold text-green-400">${total}.00</span>
+          <div className="min-w-[120px] text-center">
+            <p className="text-sm text-muted-foreground">
+              {quantity} × $50 =
             </p>
+            <p className="text-2xl font-bold text-[#3d6b51]">${total}.00</p>
           </div>
 
           <button
             type="button"
             onClick={increment}
             disabled={quantity >= MAX_BAGS}
-            className="flex h-11 w-11 items-center justify-center rounded-md border border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="Add one bag"
           >
             <Plus className="h-4 w-4" />
@@ -192,31 +193,37 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="firstName" className="text-white/80">First Name *</Label>
+            <Label htmlFor="firstName" className="text-white/80">
+              First Name *
+            </Label>
             <Input
               id="firstName"
               name="firstName"
               placeholder="Jane"
               required
               autoComplete="given-name"
-              className="border-white/20 bg-white/5 text-white placeholder:text-white/30"
+              className="border-white/10 bg-white/5 text-white placeholder:text-muted-foreground/50"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName" className="text-white/80">Last Name *</Label>
+            <Label htmlFor="lastName" className="text-white/80">
+              Last Name *
+            </Label>
             <Input
               id="lastName"
               name="lastName"
               placeholder="Smith"
               required
               autoComplete="family-name"
-              className="border-white/20 bg-white/5 text-white placeholder:text-white/30"
+              className="border-white/10 bg-white/5 text-white placeholder:text-muted-foreground/50"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white/80">Email Address *</Label>
+          <Label htmlFor="email" className="text-white/80">
+            Email Address *
+          </Label>
           <Input
             id="email"
             name="email"
@@ -224,14 +231,14 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
             placeholder="jane@example.com"
             required
             autoComplete="email"
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/30"
+            className="border-white/10 bg-white/5 text-white placeholder:text-muted-foreground/50"
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="message" className="text-white/80">
             Message{' '}
-            <span className="font-normal text-white/40">(optional)</span>
+            <span className="font-normal text-muted-foreground">(optional)</span>
           </Label>
           <Textarea
             id="message"
@@ -239,12 +246,12 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
             placeholder="Leave a supportive message to your impacted family"
             rows={3}
             maxLength={500}
-            className="border-white/20 bg-white/5 text-white placeholder:text-white/30"
+            className="border-white/10 bg-white/5 text-white placeholder:text-muted-foreground/50"
           />
         </div>
 
         {error && (
-          <div className="flex items-start gap-2 rounded-md border border-red-400/30 bg-red-400/10 p-3 text-sm text-red-400">
+          <div className="flex items-start gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             {error}
           </div>
@@ -253,7 +260,7 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
         <Button
           type="submit"
           size="lg"
-          className="w-full bg-green-500 text-white hover:bg-green-600"
+          className="btn-glow w-full bg-[#3d6b51] text-white hover:bg-[#4a7d61]"
           disabled={isPending}
         >
           {isPending ? (
@@ -269,18 +276,18 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
           )}
         </Button>
 
-        <p className="text-center text-xs text-white/40">
+        <p className="text-center text-xs text-muted-foreground">
           Payments processed securely via Stripe.
         </p>
       </form>
 
       {/* Business sponsor */}
       <div className="border-t border-white/10 pt-6 text-center">
-        <p className="text-sm text-white/50">
+        <p className="text-sm text-muted-foreground">
           Representing a business?{' '}
           <a
             href="/contact"
-            className="font-medium text-green-400 underline underline-offset-2 hover:text-green-300"
+            className="font-medium text-[#3d6b51] underline underline-offset-2 transition-colors hover:text-[#4a7d61]"
           >
             Get in touch about a bulk order
           </a>

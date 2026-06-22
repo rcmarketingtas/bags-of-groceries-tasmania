@@ -11,7 +11,12 @@ const config: Config = {
     extend: {
       fontFamily: {
         body: ['var(--font-body)', 'sans-serif'],
-        heading: ['var(--font-heading)', 'cursive'],
+        sans: ['var(--font-body)', 'sans-serif'],
+      },
+      boxShadow: {
+        card: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)',
+        'card-hover': '0 8px 24px rgba(0,0,0,0.45), 0 0 0 1px rgba(61,107,81,0.25)',
+        'glow-green': '0 0 22px rgba(61,107,81,0.5)',
       },
       colors: {
         primary: {

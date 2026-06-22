@@ -26,76 +26,74 @@ export default async function SponsorPage() {
   const totalBags = await getTotalBagsDelivered()
 
   return (
-    <div className="dark-page min-h-screen py-16">
+    <div className="min-h-screen py-16">
       <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-heading mb-3 text-4xl text-white sm:text-5xl">
+          <h1 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Buy a Bag of Groceries for a Family
           </h1>
         </div>
 
-        {/* Transparency */}
+        {/* Transparency strip */}
         <div className="mb-8 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-6">
-          <div className="flex items-center gap-2 text-sm text-white/60">
-            <ShoppingBag className="h-4 w-4 text-green-400" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ShoppingBag className="h-4 w-4 text-[#3d6b51]" />
             <span className="font-medium text-white">
               {totalBags} bags delivered so far
             </span>
           </div>
-          <div className="hidden h-4 w-px bg-white/20 sm:block" />
+          <div className="hidden h-4 w-px bg-white/10 sm:block" />
           <div className="text-sm">
             <a
               href="https://www.facebook.com/bagsofgroceriestasmania"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-green-400 underline underline-offset-2 hover:text-green-300"
+              className="font-medium text-[#3d6b51] underline underline-offset-2 transition-colors hover:text-[#4a7d61]"
             >
               Follow us on Facebook
             </a>
-            <span className="text-white/50"> to see the impact.</span>
+            <span className="text-muted-foreground"> to see the impact.</span>
           </div>
         </div>
 
-        {/* Hunger statistic */}
+        {/* Hunger stat banner */}
         <div className="mb-8 overflow-hidden rounded-xl">
-          <div className="relative">
-            <div className="h-48 w-full overflow-hidden rounded-xl bg-[#162019]">
-              <Image
-                src="/groceries.jpg"
-                alt="Groceries for Tasmanian families"
-                fill
-                className="object-cover opacity-40"
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-                <p className="text-2xl font-bold text-white sm:text-3xl">
-                  1 in 5 Australians face food insecurity.
-                </p>
-                <p className="mt-2 text-white/70">
-                  In Tasmania, the rate is even higher.
-                </p>
-                <p className="mt-1 text-xs text-white/40">
-                  Foodbank Australia, 2023
-                </p>
-              </div>
+          <div className="relative h-48 w-full bg-[#0f1623]">
+            <Image
+              src="/groceries.jpg"
+              alt="Groceries for Tasmanian families"
+              fill
+              className="object-cover opacity-30"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+              <p className="text-2xl font-bold text-white sm:text-3xl">
+                1 in 5 Australians face food insecurity.
+              </p>
+              <p className="mt-2 text-muted-foreground">
+                In Tasmania, the rate is even higher.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground/60">
+                Foodbank Australia, 2023
+              </p>
             </div>
           </div>
         </div>
 
         {/* Form card */}
-        <div className="rounded-xl bg-[#162019] p-6 shadow-sm ring-1 ring-white/10 sm:p-8">
+        <div className="form-card p-6 sm:p-8">
           <DonationForm priceFamilyBagId={priceFamilyBagId} />
         </div>
 
         {/* Trust signals */}
         <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-          <div className="flex items-center gap-2 text-sm text-white/50">
-            <Lock className="h-4 w-4 text-green-400" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4 text-[#3d6b51]" />
             Secure payment via Stripe
           </div>
-          <div className="hidden h-4 w-px bg-white/20 sm:block" />
-          <div className="flex items-center gap-2 text-sm text-white/50">
-            <ShieldCheck className="h-4 w-4 text-green-400" />
+          <div className="hidden h-4 w-px bg-white/10 sm:block" />
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 text-[#3d6b51]" />
             Your details are protected
           </div>
         </div>

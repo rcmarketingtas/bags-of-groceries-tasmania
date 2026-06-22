@@ -13,14 +13,14 @@ export function ContactForm() {
 
   if (state?.success) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center">
-        <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-primary" />
-        <h2 className="mb-2 text-xl font-semibold text-gray-900">
+      <div className="rounded-xl border border-[#3d6b51]/30 bg-[#3d6b51]/10 p-8 text-center">
+        <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-[#3d6b51]" />
+        <h2 className="mb-2 text-xl font-semibold text-white">
           Message Sent
         </h2>
         <p className="text-muted-foreground">
           Thank you for getting in touch. We&apos;ll get back to you as soon as
-          possible — usually within 1–2 business days.
+          possible, usually within a day or two.
         </p>
       </div>
     )

@@ -14,23 +14,25 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="dark-page py-20 text-center">
+      <section className="surface-lifted py-20 text-center">
         <div className="mx-auto max-w-3xl px-4">
-          <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-green-400 opacity-80" />
-          <h1 className="font-heading mb-4 text-5xl text-white sm:text-6xl">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#3d6b51]/20 ring-1 ring-[#3d6b51]/30">
+            <ShoppingBag className="h-7 w-7 text-[#3d6b51]" />
+          </div>
+          <h1 className="mb-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
             About Us
           </h1>
-          <p className="text-lg text-white/60">
+          <p className="text-lg text-muted-foreground">
             Two locals who wanted to do more than just talk about the problem.
           </p>
         </div>
       </section>
 
       {/* Our story */}
-      <section className="dark-page py-14">
+      <section className="py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-            <div className="overflow-hidden rounded-2xl shadow-xl">
+            <div className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/5">
               <Image
                 src="/founders.webp"
                 alt="Sunny Beatson and Raquel Cuevas"
@@ -40,8 +42,8 @@ export default function AboutPage() {
               />
             </div>
 
-            <div className="space-y-5 text-base leading-relaxed text-white/70">
-              <h2 className="font-heading text-3xl text-white sm:text-4xl">
+            <div className="space-y-5 text-base leading-relaxed text-muted-foreground">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 Our Story
               </h2>
               <p>
@@ -75,9 +77,9 @@ export default function AboutPage() {
       </section>
 
       {/* What we believe */}
-      <section className="dark-section py-14">
+      <section className="surface-lifted py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-heading mb-8 text-3xl text-white sm:text-4xl">
+          <h2 className="mb-8 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             What we believe
           </h2>
           <ul className="space-y-4">
@@ -89,8 +91,8 @@ export default function AboutPage() {
               'This doesn\u2019t need to be complicated. Just people helping people.',
             ].map((belief) => (
               <li key={belief} className="flex items-start gap-3">
-                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-green-400" />
-                <span className="text-white/70">{belief}</span>
+                <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-[#3d6b51]" />
+                <span className="text-muted-foreground">{belief}</span>
               </li>
             ))}
           </ul>
@@ -98,12 +100,12 @@ export default function AboutPage() {
       </section>
 
       {/* How the program works */}
-      <section className="dark-page py-14">
+      <section className="py-14">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-heading mb-10 text-center text-3xl text-white sm:text-4xl">
+          <h2 className="mb-10 text-center text-3xl font-bold text-white sm:text-4xl">
             How it works
           </h2>
-          <div className="space-y-6">
+          <div className="space-y-5">
             {[
               {
                 title: 'Someone buys a bag of groceries',
@@ -131,15 +133,17 @@ export default function AboutPage() {
                   'That\u2019s it. Food on the table. That\u2019s what this is all about.',
               },
             ].map((step, index) => (
-              <div key={index} className="flex items-start gap-4">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-white">
+              <div key={index} className="form-card flex items-start gap-4 p-5">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3d6b51] text-sm font-bold text-white">
                   {index + 1}
                 </div>
                 <div>
                   <h3 className="mb-1 font-semibold text-white">
                     {step.title}
                   </h3>
-                  <p className="text-white/60">{step.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {step.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -148,12 +152,12 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="dark-section py-16 text-center">
+      <section className="surface-lifted py-16 text-center">
         <div className="mx-auto max-w-2xl px-4">
-          <h2 className="font-heading mb-4 text-3xl text-white sm:text-4xl">
+          <h2 className="mb-4 text-3xl font-bold text-white sm:text-4xl">
             Want to get involved?
           </h2>
-          <p className="mb-8 text-white/60">
+          <p className="mb-8 text-muted-foreground">
             Buy a bag of groceries or reach out. We&apos;d love to hear from
             you.
           </p>
@@ -161,7 +165,7 @@ export default function AboutPage() {
             <Button
               asChild
               size="lg"
-              className="bg-green-500 text-white hover:bg-green-600"
+              className="btn-glow bg-[#3d6b51] text-white hover:bg-[#4a7d61]"
             >
               <Link href="/sponsor">Buy a Bag of Groceries</Link>
             </Button>
@@ -169,7 +173,7 @@ export default function AboutPage() {
               asChild
               size="lg"
               variant="outline"
-              className="border-white/30 text-white hover:bg-white/10"
+              className="border-white/15 bg-transparent text-white/80 hover:border-white/30 hover:bg-white/5 hover:text-white"
             >
               <Link href="/contact">Get in Touch</Link>
             </Button>

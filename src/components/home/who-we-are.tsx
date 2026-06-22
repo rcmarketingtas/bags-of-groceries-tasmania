@@ -3,12 +3,12 @@ import { Heart } from 'lucide-react'
 
 export function WhoWeAre() {
   return (
-    <section className="dark-page py-12">
+    <section className="py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Photo */}
           <div className="relative">
-            <div className="overflow-hidden rounded-2xl shadow-xl">
+            <div className="overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/5">
               <Image
                 src="/founders.webp"
                 alt="Sunny Beatson and Raquel Cuevas, founders of Bags of Groceries Tasmania"
@@ -17,23 +17,23 @@ export function WhoWeAre() {
                 className="h-auto w-full object-cover"
               />
             </div>
-            <p className="mt-3 text-center text-sm text-white/50">
+            <p className="mt-3 text-center text-sm text-muted-foreground">
               Sunny Beatson &amp; Raquel Cuevas, Founders
             </p>
           </div>
 
           {/* Story */}
           <div>
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-green-400/30 bg-green-400/10 px-4 py-1.5 text-sm font-medium text-green-400">
-              <Heart className="h-3.5 w-3.5 fill-green-400" />
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#3d6b51]/30 bg-[#3d6b51]/10 px-4 py-1.5 text-sm font-medium text-[#3d6b51]">
+              <Heart className="h-3.5 w-3.5 fill-[#3d6b51]" />
               Who We Are
             </div>
 
-            <h2 className="font-heading mb-6 text-3xl text-white sm:text-4xl">
+            <h2 className="mb-6 text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Started by two locals who wanted to do something real
             </h2>
 
-            <div className="space-y-4 text-base leading-relaxed text-white/70">
+            <div className="space-y-4 text-base leading-relaxed text-muted-foreground">
               <p>
                 We&apos;re Sunny and Raquel, and we&apos;ve watched more and
                 more families around us struggle to get by. We wanted to

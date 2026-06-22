@@ -3,9 +3,9 @@ import { ShoppingBag, Package, Heart } from 'lucide-react'
 const steps = [
   {
     icon: ShoppingBag,
-    title: 'Sponsor a Grocery Bag',
+    title: 'Buy a Bag of Groceries',
     description:
-      'Pick how many bags you want to sponsor. Your money goes straight toward buying groceries for a Tassie family doing it tough.',
+      'Pick how many bags you want to buy. Your money goes straight toward groceries for a Tassie family doing it tough.',
   },
   {
     icon: Package,
@@ -17,39 +17,36 @@ const steps = [
     icon: Heart,
     title: 'Families Receive Support',
     description:
-      'Families we\u2019ve approved get their bags. Simple as that. Real food, real help, right here in Tasmania.',
+      'Families we\u2019ve approved get their bags. Real food, real help, right here in Tasmania.',
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section className="bg-white py-12">
+    <section className="surface-lifted py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             How It Works
           </h2>
+          <p className="text-muted-foreground">Three simple steps that make a real difference.</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {steps.map((step, index) => (
-            <div key={step.title} className="relative text-center">
-              {/* Connector line */}
-              {index < steps.length - 1 && (
-                <div className="absolute left-1/2 top-8 hidden h-0.5 w-full -translate-y-1/2 bg-primary/20 md:block" />
-              )}
-
-              <div className="relative mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg">
-                <step.icon className="h-7 w-7" />
-                <span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-xs font-bold text-white">
+            <div key={step.title} className="card-surface relative p-6 text-center">
+              {/* Step number */}
+              <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#3d6b51]/20 ring-1 ring-[#3d6b51]/30">
+                <step.icon className="h-6 w-6 text-[#3d6b51]" />
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#3d6b51] text-xs font-bold text-white">
                   {index + 1}
                 </span>
               </div>
 
-              <h3 className="mb-3 text-xl font-semibold text-gray-900">
-                {index + 1}. {step.title}
+              <h3 className="mb-3 text-lg font-semibold text-white">
+                {step.title}
               </h3>
-              <p className="leading-relaxed text-muted-foreground">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 {step.description}
               </p>
             </div>

@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#FDFAF7] py-16">
+    <div className="min-h-screen py-16">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <h1 className="mb-3 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h1 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Get in Touch
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -23,42 +23,40 @@ export default function ContactPage() {
 
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-5">
           {/* Info sidebar */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             <div>
-              <h2 className="mb-4 font-semibold text-gray-900">
+              <h2 className="mb-4 font-semibold text-white">
                 Contact Information
               </h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Mail className="h-4 w-4 text-primary" />
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/20">
+                    <Mail className="h-4 w-4 text-[#3d6b51]" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Email</p>
+                    <p className="text-sm font-medium text-white">Email</p>
                     <p className="text-sm text-muted-foreground">
                       hello@bagsofgroceries.org.au
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <MapPin className="h-4 w-4 text-primary" />
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/20">
+                    <MapPin className="h-4 w-4 text-[#3d6b51]" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      Location
-                    </p>
+                    <p className="text-sm font-medium text-white">Location</p>
                     <p className="text-sm text-muted-foreground">
                       Launceston, Tasmania
                     </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Clock className="h-4 w-4 text-primary" />
+                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/20">
+                    <Clock className="h-4 w-4 text-[#3d6b51]" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-white">
                       Response Time
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -69,15 +67,17 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="rounded-xl bg-primary p-6 text-white">
-              <h3 className="mb-2 font-semibold">Need help right now?</h3>
-              <p className="mb-4 text-sm text-primary-foreground/80">
+            <div className="rounded-xl border border-[#3d6b51]/30 bg-[#3d6b51]/10 p-6">
+              <h3 className="mb-2 font-semibold text-white">
+                Need help right now?
+              </h3>
+              <p className="mb-4 text-sm text-muted-foreground">
                 If your family needs groceries urgently, put in an application
                 and let us know and we&apos;ll do our best to move quickly.
               </p>
               <a
                 href="/apply"
-                className="inline-block rounded-md bg-white px-4 py-2 text-sm font-semibold text-primary hover:bg-gray-100 transition-colors"
+                className="btn-glow inline-block rounded-lg bg-[#3d6b51] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#4a7d61]"
               >
                 Apply for Assistance
               </a>
@@ -86,7 +86,7 @@ export default function ContactPage() {
 
           {/* Form */}
           <div className="lg:col-span-3">
-            <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-border sm:p-8">
+            <div className="form-card p-6 sm:p-8">
               <ContactForm />
             </div>
           </div>
