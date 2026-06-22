@@ -13,10 +13,19 @@ const config: Config = {
         body: ['var(--font-body)', 'sans-serif'],
         sans: ['var(--font-body)', 'sans-serif'],
       },
+      colors: {
+        sage: '#3d6b51',
+        forest: '#1c4d31',
+        'forest-dark': '#163d27',
+        'sage-muted': '#A3C2B2',
+        'surface-light': '#F4F7F5',
+        'border-light': '#D5E0DA',
+        'border-dark': '#163D27',
+      },
       boxShadow: {
-        card: '0 1px 3px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03)',
-        'card-hover': '0 8px 24px rgba(0,0,0,0.45), 0 0 0 1px rgba(61,107,81,0.25)',
-        'glow-green': '0 0 22px rgba(61,107,81,0.5)',
+        card: '0 1px 3px rgba(28,77,49,0.1)',
+        'card-hover': '0 8px 24px rgba(28,77,49,0.15)',
+        'glow-forest': '0 0 22px rgba(28,77,49,0.45)',
       },
       colors: {
         primary: {

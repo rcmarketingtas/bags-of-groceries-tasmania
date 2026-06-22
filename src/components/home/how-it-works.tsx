@@ -23,30 +23,28 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="surface-lifted py-16">
+    <section className="section-white py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-14 text-center">
-          <h2 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="mb-3 text-3xl font-bold tracking-tight text-black sm:text-4xl">
             How It Works
           </h2>
-          <p className="text-muted-foreground">Three simple steps that make a real difference.</p>
+          <p className="text-[#1c4d31]">Three simple steps that make a real difference.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {steps.map((step, index) => (
-            <div key={step.title} className="card-surface relative p-6 text-center">
-              {/* Step number */}
-              <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#3d6b51]/20 ring-1 ring-[#3d6b51]/30">
-                <step.icon className="h-6 w-6 text-[#3d6b51]" />
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#3d6b51] text-xs font-bold text-white">
+            <div key={step.title} className="card-light p-7 text-center">
+              <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[#3d6b51]/15">
+                <step.icon className="h-6 w-6 text-[#1c4d31]" />
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#1c4d31] text-xs font-bold text-white">
                   {index + 1}
                 </span>
               </div>
-
-              <h3 className="mb-3 text-lg font-semibold text-white">
+              <h3 className="mb-3 text-lg font-semibold text-black">
                 {step.title}
               </h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="text-sm leading-relaxed text-[#1c4d31]/80">
                 {step.description}
               </p>
             </div>
