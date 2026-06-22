@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react'
 
 export function WhoWeAre() {
   return (
-    <section className="bg-primary/5 py-20">
+    <section className="bg-[#FDFAF7] py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           {/* Photo */}

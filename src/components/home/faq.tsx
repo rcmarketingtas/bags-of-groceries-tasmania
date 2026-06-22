@@ -35,7 +35,7 @@ const faqs = [
 
 export function FAQ() {
   return (
-    <section className="bg-gray-50 py-20">
+    <section className="bg-[#FDFAF7] py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">

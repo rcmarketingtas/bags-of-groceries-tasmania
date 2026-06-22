@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Nunito } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const nunito = Nunito({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bagsofgroceries.org.au'
 
@@ -59,7 +59,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en-AU">
-      <body className={inter.className}>{children}</body>
+      <body className={nunito.className}>{children}</body>
     </html>
   )
 }

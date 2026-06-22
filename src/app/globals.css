@@ -4,37 +4,39 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    /* Warm off-white background — #FDFAF7 */
+    --background: 40 43% 98%;
     --foreground: 222 47% 11%;
 
-    --card: 0 0% 100%;
+    --card: 40 43% 98%;
     --card-foreground: 222 47% 11%;
 
-    --popover: 0 0% 100%;
+    --popover: 40 43% 98%;
     --popover-foreground: 222 47% 11%;
 
-    /* Primary: #2E7D32 green */
-    --primary: 123 43% 34%;
+    /* Primary: #3E6B4E — warmer, softer green */
+    --primary: 145 27% 33%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: #FF9800 orange */
-    --secondary: 36 100% 50%;
+    /* Secondary: #C2622D — terracotta/warm amber */
+    --secondary: 21 63% 47%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96%;
+    --muted: 40 20% 93%;
     --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96%;
+    --accent: 40 20% 93%;
     --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 123 43% 34%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 145 27% 33%;
 
-    --radius: 0.5rem;
+    /* Slightly less pill-shaped */
+    --radius: 0.375rem;
   }
 }
 

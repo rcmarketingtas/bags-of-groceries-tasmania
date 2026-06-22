@@ -75,7 +75,7 @@ export default function AboutPage() {
       </section>
 
       {/* What we believe */}
-      <section className="bg-gray-50 py-20">
+      <section className="bg-[#FDFAF7] py-20">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-8 text-3xl font-bold tracking-tight text-gray-900">
             What we believe
