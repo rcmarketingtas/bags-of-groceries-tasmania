@@ -21,8 +21,7 @@ export default function DonationReceiptEmail({ firstName, bags, amount }: Props)
     <Html>
       <Head />
       <Preview>
-        Thank you for sponsoring {bags} grocery bag{bags > 1 ? 's' : ''} —
-        Bags of Groceries Tasmania
+        {`Thank you for sponsoring ${bags} grocery bag${bags > 1 ? 's' : ''} — Bags of Groceries Tasmania`}
       </Preview>
       <Body style={body}>
         <Container style={container}>
