@@ -2,14 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle2, Heart, Facebook } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getSiteUrl } from '@/lib/site-url'
 
 export const metadata: Metadata = {
   title: 'Thank You for Your Support',
   description: 'Your donation has been received. Thank you for supporting Tasmanian families.',
 }
 
-const SITE_URL = 'https://bagsofgroceries.org.au'
-const FB_SHARE_URL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_URL)}&quote=${encodeURIComponent('I just bought a bag of groceries for a Tasmanian family in need. You can too!')}`
+const siteUrl = getSiteUrl()
+const FB_SHARE_URL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteUrl)}&quote=${encodeURIComponent('I just bought a bag of groceries for a Tasmanian family in need. You can too!')}`
 
 export default function ThankYouPage() {
   return (

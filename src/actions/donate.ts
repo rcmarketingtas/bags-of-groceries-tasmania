@@ -9,6 +9,7 @@ import {
 } from '@/lib/stripe'
 import { rateLimit } from '@/lib/rate-limit'
 import { donationSchema } from '@/lib/validations'
+import { getSiteUrl } from '@/lib/site-url'
 
 const MAX_BAGS = 1000
 
@@ -62,7 +63,7 @@ export async function createCheckoutSession(
   const quantity =
     isNaN(quantityRaw) || quantityRaw < 1 ? 1 : Math.min(quantityRaw, MAX_BAGS)
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!.replace(/\/$/, '')
+  const siteUrl = getSiteUrl()
 
   try {
     const session = await getStripe().checkout.sessions.create({

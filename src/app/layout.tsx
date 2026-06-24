@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
+import { getSiteUrl } from '@/lib/site-url'
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -8,7 +9,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: 'swap',
 })
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://bagsofgroceries.org.au'
+const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
