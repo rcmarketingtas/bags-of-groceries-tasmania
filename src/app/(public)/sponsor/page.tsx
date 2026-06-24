@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: 'Buy a bag of groceries for a Tasmanian family doing it tough. $50 per bag.',
 }
 
+// Keep bag total in sync with live donations (same issue as homepage counter).
+export const revalidate = 60
+
 async function getTotalBagsDelivered(): Promise<number> {
   try {
     const supabase = createAdminClient()

@@ -6,6 +6,9 @@ import { ContactCTA } from '@/components/home/contact-cta'
 import { TasmaniaMap } from '@/components/home/tasmania-map'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+// Re-fetch donation totals periodically; static build had frozen count at 0.
+export const revalidate = 60
+
 async function getTotalFamiliesFed(): Promise<number> {
   try {
     const supabase = createAdminClient()
