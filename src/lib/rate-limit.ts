@@ -11,11 +11,16 @@ function getRatelimit(): Ratelimit | null {
     return null
   }
   if (!_ratelimit) {
-    _ratelimit = new Ratelimit({
-      redis: Redis.fromEnv(),
-      limiter: Ratelimit.slidingWindow(5, '1 m'),
-      analytics: false,
-    })
+    try {
+      _ratelimit = new Ratelimit({
+        redis: Redis.fromEnv(),
+        limiter: Ratelimit.slidingWindow(5, '1 m'),
+        analytics: false,
+      })
+    } catch (err) {
+      console.error('Rate limit init failed (disabled):', err)
+      return null
+    }
   }
   return _ratelimit
 }
@@ -25,5 +30,11 @@ export async function rateLimit(
 ): Promise<{ success: boolean }> {
   const rl = getRatelimit()
   if (!rl) return { success: true }
-  return rl.limit(identifier)
+
+  try {
+    return await rl.limit(identifier)
+  } catch (err) {
+    console.error('Rate limit check failed (allowing request):', err)
+    return { success: true }
+  }
 }

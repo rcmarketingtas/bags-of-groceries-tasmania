@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { render } from '@react-email/render'
 import type { ReactElement } from 'react'
 
 let _resend: Resend | null = null
@@ -20,9 +21,6 @@ export function getFromEmail(): string {
     'Bags of Groceries Tasmania <noreply@bagsofgroceries.org.au>'
   )
 }
-
-/** @deprecated use getFromEmail() */
-export const FROM_EMAIL = getFromEmail()
 
 export function getAdminNotifyEmails(): string[] {
   const raw = process.env.ADMIN_NOTIFY_EMAIL ?? ''
@@ -52,16 +50,21 @@ export function getResendConfigErrors(): string[] {
   return errors
 }
 
+async function renderEmailHtml(react: ReactElement): Promise<string> {
+  return render(react)
+}
+
 export async function sendEmail(options: {
   to: string | string[]
   subject: string
   react: ReactElement
 }): Promise<void> {
+  const html = await renderEmailHtml(options.react)
   const { error } = await getResend().emails.send({
     from: getFromEmail(),
     to: options.to,
     subject: options.subject,
-    react: options.react,
+    html,
   })
 
   if (error) {
@@ -80,11 +83,12 @@ export async function sendAdminNotification(options: {
     return
   }
 
+  const html = await renderEmailHtml(options.react)
   const { error } = await getResend().emails.send({
     from: getFromEmail(),
     to: recipients,
     subject: options.subject,
-    react: options.react,
+    html,
     replyTo: options.replyTo,
   })
 
