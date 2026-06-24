@@ -68,6 +68,7 @@ export async function createCheckoutSession(
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
       line_items: [{ price: priceId, quantity }],
+      allow_promotion_codes: true,
       customer_email: email,
       metadata: {
         first_name: firstName,

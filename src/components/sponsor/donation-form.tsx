@@ -210,7 +210,7 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
         </Button>
 
         <p className="text-center text-xs text-[#A3C2B2]/60">
-          Payments processed securely via Stripe.
+          Payments processed securely via Stripe. Have a coupon code? Enter it on the payment page.
         </p>
       </form>
 
