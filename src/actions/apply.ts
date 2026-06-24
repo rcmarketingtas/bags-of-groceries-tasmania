@@ -3,10 +3,11 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { sendAdminNotification, sendEmail } from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { applicationSchema } from '@/lib/validations'
 import ApplicationConfirmationEmail from '@/emails/application-confirmation'
+import AdminNewApplicationEmail from '@/emails/admin-new-application'
 
 export async function submitApplication(
   _prevState: unknown,
@@ -62,8 +63,7 @@ export async function submitApplication(
   }
 
   try {
-    await getResend().emails.send({
-      from: FROM_EMAIL,
+    await sendEmail({
       to: data.email,
       subject: 'Your application has been received — Bags of Groceries Tasmania',
       react: createElement(ApplicationConfirmationEmail, {
@@ -71,8 +71,17 @@ export async function submitApplication(
       }),
     })
   } catch (emailErr) {
-    console.error('Email error:', emailErr)
-    // Don't fail the request if email fails
+    console.error('Applicant confirmation email error:', emailErr)
+  }
+
+  try {
+    await sendAdminNotification({
+      subject: `New application: ${data.firstName} ${data.lastName}`,
+      react: createElement(AdminNewApplicationEmail, data),
+      replyTo: data.email,
+    })
+  } catch (emailErr) {
+    console.error('Admin application notification error:', emailErr)
   }
 
   return { success: true }

@@ -3,8 +3,9 @@ import type Stripe from 'stripe'
 import { createElement } from 'react'
 import { getStripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { sendAdminNotification, sendEmail } from '@/lib/resend'
 import DonationReceiptEmail from '@/emails/donation-receipt'
+import AdminNewDonationEmail from '@/emails/admin-new-donation'
 
 export async function POST(request: NextRequest) {
   const body = await request.text()
@@ -68,16 +69,30 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      await getResend().emails.send({
-        from: FROM_EMAIL,
+      const bags = parseInt(meta.bags ?? '1', 10)
+      const amount = (session.amount_total ?? 0) / 100
+
+      await sendEmail({
         to: meta.email,
-        subject:
-          'Thank you for your donation — Bags of Groceries Tasmania',
+        subject: 'Thank you for your donation — Bags of Groceries Tasmania',
         react: createElement(DonationReceiptEmail, {
           firstName: meta.first_name,
-          bags: parseInt(meta.bags ?? '1', 10),
-          amount: (session.amount_total ?? 0) / 100,
+          bags,
+          amount,
         }),
+      })
+
+      await sendAdminNotification({
+        subject: `New donation: ${bags} bag${bags !== 1 ? 's' : ''} from ${meta.first_name} ${meta.last_name}`,
+        react: createElement(AdminNewDonationEmail, {
+          firstName: meta.first_name,
+          lastName: meta.last_name,
+          email: meta.email,
+          bags,
+          amount,
+          message: meta.message || undefined,
+        }),
+        replyTo: meta.email,
       })
     } catch (emailErr) {
       console.error('Email send error:', emailErr)

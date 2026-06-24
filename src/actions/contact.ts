@@ -3,10 +3,11 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { getResend, FROM_EMAIL } from '@/lib/resend'
+import { sendAdminNotification, sendEmail } from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { contactSchema } from '@/lib/validations'
 import ContactConfirmationEmail from '@/emails/contact-confirmation'
+import AdminNewContactEmail from '@/emails/admin-new-contact'
 
 export async function submitContact(
   _prevState: unknown,
@@ -17,7 +18,7 @@ export async function submitContact(
 
   const { success: rateLimitOk } = await rateLimit(`contact:${ip}`)
   if (!rateLimitOk) {
-    return { error: 'Too many requests. Please try again.' }
+    return { error: 'Too many requests. Please try again in a minute.' }
   }
 
   const raw = Object.fromEntries(formData.entries())
@@ -41,14 +42,23 @@ export async function submitContact(
   }
 
   try {
-    await getResend().emails.send({
-      from: FROM_EMAIL,
+    await sendEmail({
       to: email,
       subject: "We've received your message — Bags of Groceries Tasmania",
       react: createElement(ContactConfirmationEmail, { name }),
     })
   } catch (emailErr) {
-    console.error('Email error:', emailErr)
+    console.error('Contact confirmation email error:', emailErr)
+  }
+
+  try {
+    await sendAdminNotification({
+      subject: `New contact message from ${name}`,
+      react: createElement(AdminNewContactEmail, { name, email, message }),
+      replyTo: email,
+    })
+  } catch (emailErr) {
+    console.error('Admin contact notification error:', emailErr)
   }
 
   return { success: true }
