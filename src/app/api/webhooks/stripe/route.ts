@@ -45,33 +45,44 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient()
+    const stripePaymentId =
+      typeof session.payment_intent === 'string'
+        ? session.payment_intent
+        : session.id
+    const bags = parseInt(meta.bags ?? '1', 10)
+    const amount = (session.amount_total ?? 0) / 100
 
     const { error: dbError } = await supabase.from('donations').insert({
       first_name: meta.first_name,
       last_name: meta.last_name,
       email: meta.email,
       amount: session.amount_total ?? 0,
-      bags: parseInt(meta.bags ?? '1', 10),
+      bags,
       message: meta.message || null,
-      stripe_payment_id:
-        typeof session.payment_intent === 'string'
-          ? session.payment_intent
-          : session.id,
+      stripe_payment_id: stripePaymentId,
     })
 
-    if (dbError) {
-      // Avoid duplicate key errors on retried webhooks
-      if (dbError.code === '23505') {
-        return NextResponse.json({ received: true })
-      }
-      console.error('DB insert error:', dbError)
+    const isDuplicateDonation = dbError?.code === '23505'
+
+    if (dbError && !isDuplicateDonation) {
+      console.error('DB insert error:', {
+        sessionId: session.id,
+        stripePaymentId,
+        code: dbError.code,
+        message: dbError.message,
+      })
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    try {
-      const bags = parseInt(meta.bags ?? '1', 10)
-      const amount = (session.amount_total ?? 0) / 100
+    if (isDuplicateDonation) {
+      console.info('Donation already recorded; sending receipt email anyway', {
+        sessionId: session.id,
+        stripePaymentId,
+        email: meta.email,
+      })
+    }
 
+    try {
       await sendEmail({
         to: meta.email,
         subject: 'Thank you for your donation — Bags of Groceries Tasmania',
@@ -82,20 +93,29 @@ export async function POST(request: NextRequest) {
         }),
       })
 
-      await sendAdminNotification({
-        subject: `New donation: ${bags} bag${bags !== 1 ? 's' : ''} from ${meta.first_name} ${meta.last_name}`,
-        react: createElement(AdminNewDonationEmail, {
-          firstName: meta.first_name,
-          lastName: meta.last_name,
-          email: meta.email,
-          bags,
-          amount,
-          message: meta.message || undefined,
-        }),
-        replyTo: meta.email,
-      })
+      if (!isDuplicateDonation) {
+        await sendAdminNotification({
+          subject: `New donation: ${bags} bag${bags !== 1 ? 's' : ''} from ${meta.first_name} ${meta.last_name}`,
+          react: createElement(AdminNewDonationEmail, {
+            firstName: meta.first_name,
+            lastName: meta.last_name,
+            email: meta.email,
+            bags,
+            amount,
+            message: meta.message || undefined,
+          }),
+          replyTo: meta.email,
+        })
+      }
     } catch (emailErr) {
-      console.error('Email send error:', emailErr)
+      console.error('Donation email send failed:', {
+        sessionId: session.id,
+        stripePaymentId,
+        recipient: meta.email,
+        isDuplicateDonation,
+        error: emailErr,
+      })
+      return NextResponse.json({ error: 'Email send failed' }, { status: 500 })
     }
   }
 
