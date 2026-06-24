@@ -1,16 +1,29 @@
 'use server'
 
 import { headers } from 'next/headers'
-import { getStripe, STRIPE_PRODUCTS } from '@/lib/stripe'
+import {
+  getStripe,
+  getStripeConfigErrors,
+  getStripeProducts,
+  stripeErrorMessage,
+} from '@/lib/stripe'
 import { rateLimit } from '@/lib/rate-limit'
 import { donationSchema } from '@/lib/validations'
 
-const VALID_PRICE_IDS = () =>
-  Object.values(STRIPE_PRODUCTS).map((p) => p.priceId)
+const MAX_BAGS = 1000
 
 export async function createCheckoutSession(
   formData: FormData,
 ): Promise<{ url?: string; error?: string }> {
+  const configErrors = getStripeConfigErrors()
+  if (configErrors.length > 0) {
+    console.error('Stripe config errors:', configErrors)
+    return {
+      error:
+        'Payments are not configured yet. The site owner needs to add Stripe environment variables.',
+    }
+  }
+
   const headersList = await headers()
   const ip = headersList.get('x-forwarded-for') ?? 'unknown'
 
@@ -34,12 +47,22 @@ export async function createCheckoutSession(
 
   const { firstName, lastName, email, message, priceId } = result.data
 
-  if (!VALID_PRICE_IDS().includes(priceId)) {
-    return { error: 'Invalid product selected.' }
+  const validPriceIds = Object.values(getStripeProducts())
+    .map((p) => p.priceId)
+    .filter(Boolean)
+
+  if (!validPriceIds.includes(priceId)) {
+    return {
+      error:
+        'Invalid product selected. Check STRIPE_PRICE_FAMILY_BAG is set correctly in your environment.',
+    }
   }
 
   const quantityRaw = parseInt((formData.get('quantity') as string) ?? '1', 10)
-  const quantity = isNaN(quantityRaw) || quantityRaw < 1 ? 1 : Math.min(quantityRaw, 10)
+  const quantity =
+    isNaN(quantityRaw) || quantityRaw < 1 ? 1 : Math.min(quantityRaw, MAX_BAGS)
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!.replace(/\/$/, '')
 
   try {
     const session = await getStripe().checkout.sessions.create({
@@ -53,13 +76,20 @@ export async function createCheckoutSession(
         message: message ?? '',
         bags: quantity.toString(),
       },
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/sponsor`,
+      success_url: `${siteUrl}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/sponsor`,
     })
 
-    return { url: session.url! }
+    if (!session.url) {
+      return { error: 'Stripe did not return a checkout URL. Please try again.' }
+    }
+
+    return { url: session.url }
   } catch (err) {
     console.error('Stripe error:', err)
-    return { error: 'Payment could not be started. Please try again.' }
+    const message = stripeErrorMessage(err)
+    return {
+      error: `Payment could not be started: ${message}`,
+    }
   }
 }

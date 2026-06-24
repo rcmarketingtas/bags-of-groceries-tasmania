@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ShieldCheck, Lock, ShoppingBag, Utensils, Users, TrendingUp } from 'lucide-react'
 import { DonationForm } from '@/components/sponsor/donation-form'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
 
 export const metadata: Metadata = {
   title: 'Buy a Bag of Groceries',
@@ -20,7 +21,8 @@ async function getTotalBagsDelivered(): Promise<number> {
 }
 
 export default async function SponsorPage() {
-  const priceFamilyBagId = process.env.STRIPE_PRICE_FAMILY_BAG!
+  const priceFamilyBagId = getFamilyBagPriceId() ?? ''
+  const stripeConfigErrors = getStripeConfigErrors()
   const totalBags = await getTotalBagsDelivered()
 
   return (
@@ -97,6 +99,20 @@ export default async function SponsorPage() {
       {/* Form — Sage A */}
       <section className="section-sage py-12 pb-20">
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+          {stripeConfigErrors.length > 0 && (
+            <div className="mb-6 rounded-xl border border-amber-300/40 bg-amber-400/10 p-4 text-sm text-amber-100">
+              <p className="font-semibold text-white">Stripe is not configured yet</p>
+              <p className="mt-1 text-amber-100/90">
+                Add these environment variables in Vercel, then redeploy:
+              </p>
+              <ul className="mt-2 list-inside list-disc space-y-1 text-amber-100/80">
+                {stripeConfigErrors.map((err) => (
+                  <li key={err}>{err}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="card-dark p-6 sm:p-8">
             <DonationForm priceFamilyBagId={priceFamilyBagId} />
           </div>
