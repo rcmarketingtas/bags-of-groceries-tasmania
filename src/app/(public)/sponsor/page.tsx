@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { ShieldCheck, Lock, ShoppingBag, Utensils, Users, TrendingUp } from 'lucide-react'
 import { DonationForm } from '@/components/sponsor/donation-form'
 import { FB_PAGE_URL } from '@/lib/facebook'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { getTotalBagsDelivered } from '@/lib/donations'
 import { getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
 
 export const metadata: Metadata = {
@@ -10,19 +10,7 @@ export const metadata: Metadata = {
   description: 'Buy a bag of groceries for a Tasmanian family doing it tough. $50 per bag.',
 }
 
-// Keep bag total in sync with live donations (same issue as homepage counter).
-export const revalidate = 60
-
-async function getTotalBagsDelivered(): Promise<number> {
-  try {
-    const supabase = createAdminClient()
-    const { data } = await supabase.from('donations').select('bags')
-    if (!data) return 0
-    return data.reduce((sum, row) => sum + (row.bags ?? 0), 0)
-  } catch {
-    return 0
-  }
-}
+export const dynamic = 'force-dynamic'
 
 export default async function SponsorPage() {
   const priceFamilyBagId = getFamilyBagPriceId() ?? ''

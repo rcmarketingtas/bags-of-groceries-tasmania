@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 import type Stripe from 'stripe'
 import { createElement } from 'react'
@@ -85,6 +86,9 @@ export async function POST(request: NextRequest) {
         stripePaymentId,
         email: meta.email,
       })
+    } else {
+      revalidatePath('/')
+      revalidatePath('/sponsor')
     }
 
     assertResendConfig('stripe webhook')
