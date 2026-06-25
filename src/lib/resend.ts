@@ -5,10 +5,7 @@ import type { ReactElement } from 'react'
 let _resend: Resend | null = null
 
 /** Resend sandbox/test domains — can only deliver to the account owner unless a custom domain is verified. */
-const SANDBOX_FROM_PATTERNS = [
-  /@resend\.dev$/i,
-  /\.resend\.app$/i,
-]
+const SANDBOX_FROM_PATTERNS = [/@resend\.dev$/i, /\.resend\.app$/i]
 
 export class ResendSandboxError extends Error {
   readonly blockedRecipients: string[]
@@ -21,7 +18,7 @@ export class ResendSandboxError extends Error {
 }
 
 export type SendEmailResult =
-  | { ok: true }
+  | { ok: true; id?: string }
   | { ok: false; error: string; resendError?: { name: string; message: string } }
 
 export function normalizeFromEmail(raw: string): string {
@@ -55,6 +52,11 @@ export function getFromEmail(): string {
     process.env.RESEND_FROM_EMAIL ??
     'Bags of Groceries Tasmania <noreply@bagsofgroceries.org.au>'
   return normalizeFromEmail(raw)
+}
+
+/** Bare email only — used as fallback if display-name format is rejected. */
+export function getFromEmailAddressOnly(): string {
+  return extractEmailAddress(getFromEmail())
 }
 
 export function getAdminNotifyEmails(): string[] {
@@ -120,7 +122,7 @@ export function getResendConfigErrors(): string[] {
   return errors
 }
 
-/** Log Resend env issues once per request path before attempting sends. */
+/** Log Resend env issues once per request path before attempting sends. Never blocks sends. */
 export function assertResendConfig(context: string): void {
   const errors = getResendConfigErrors()
   const warnings = getResendConfigWarnings()
@@ -139,10 +141,10 @@ function normalizeRecipients(to: string | string[]): string[] {
 }
 
 /**
- * Resend free/sandbox mode only allows sending TO the email used to create the account.
- * Fail fast with a clear message instead of a cryptic API 403.
+ * Warn when sandbox FROM + owner email suggest a recipient will be rejected by Resend.
+ * Does NOT block the API call — attempts must reach Resend so dashboard/logs show activity.
  */
-export function validateRecipientForSandbox(to: string | string[]): void {
+export function warnSandboxRecipientMismatch(to: string | string[]): void {
   if (!isResendSandboxFromAddress()) {
     return
   }
@@ -153,12 +155,18 @@ export function validateRecipientForSandbox(to: string | string[]): void {
   }
 
   const recipients = normalizeRecipients(to)
-  const blocked = recipients.filter((r) => r !== owner)
+  const likelyBlocked = recipients.filter((r) => r !== owner)
 
-  if (blocked.length > 0) {
-    throw new ResendSandboxError(
-      `Resend sandbox cannot send to ${blocked.join(', ')}. Only ${owner} is allowed until you verify a custom sending domain in Resend.`,
-      blocked,
+  if (likelyBlocked.length > 0) {
+    console.warn(
+      '[resend] sandbox recipient warning — send will still be attempted:',
+      {
+        from: getFromEmail(),
+        to: recipients,
+        likelyBlocked,
+        allowedInSandbox: owner,
+        hint: 'Verify a custom domain in Resend or test with RESEND_ACCOUNT_OWNER_EMAIL as the recipient.',
+      },
     )
   }
 }
@@ -207,20 +215,131 @@ function logResendFailure(
   console.error(`[resend] ${operation} failed:`, payload)
 }
 
-async function renderEmailHtml(react: ReactElement): Promise<string> {
+function logSendAttempt(
+  operation: string,
+  details: { from: string; to: string | string[]; subject: string; replyTo?: string },
+): void {
+  console.info(`[resend] ${operation} attempt:`, {
+    from: details.from,
+    fromAddress: extractEmailAddress(details.from),
+    to: details.to,
+    subject: details.subject,
+    replyTo: details.replyTo ?? null,
+    sandboxFrom: isResendSandboxFromAddress(details.from),
+  })
+}
+
+function buildFallbackHtml(subject: string): string {
+  const escaped = subject
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  return `<!DOCTYPE html><html><body><p>${escaped}</p><p>Bags of Groceries Tasmania</p></body></html>`
+}
+
+async function renderEmailHtml(
+  react: ReactElement,
+  subject: string,
+): Promise<{ html: string; text: string; usedFallback: boolean }> {
   try {
     const html = await render(react)
     if (!html?.trim()) {
       throw new Error('@react-email/render returned empty HTML')
     }
-    return html
+    const text = subject
+    return { html, text, usedFallback: false }
   } catch (err) {
-    console.error('[resend] @react-email/render failed:', {
+    console.error('[resend] @react-email/render failed — using plain html/text fallback:', {
+      subject,
       error: err instanceof Error ? err.message : err,
       stack: err instanceof Error ? err.stack : undefined,
     })
-    throw err
+    return {
+      html: buildFallbackHtml(subject),
+      text: subject,
+      usedFallback: true,
+    }
   }
+}
+
+type SendPayload = {
+  from: string
+  to: string | string[]
+  subject: string
+  html: string
+  text: string
+  replyTo?: string
+}
+
+async function sendViaResend(
+  operation: string,
+  payload: SendPayload,
+): Promise<{ id?: string }> {
+  const fromCandidates = [
+    payload.from,
+    ...(payload.from !== getFromEmailAddressOnly()
+      ? [getFromEmailAddressOnly()]
+      : []),
+  ]
+
+  let lastError: ResendApiError | null = null
+
+  for (const from of fromCandidates) {
+    logSendAttempt(operation, {
+      from,
+      to: payload.to,
+      subject: payload.subject,
+      replyTo: payload.replyTo,
+    })
+
+    const { data, error } = await getResend().emails.send({
+      from,
+      to: payload.to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
+      replyTo: payload.replyTo,
+    })
+
+    if (!error) {
+      console.info(`[resend] ${operation} accepted by Resend:`, {
+        id: data?.id ?? null,
+        from,
+        to: payload.to,
+        subject: payload.subject,
+      })
+      return { id: data?.id }
+    }
+
+    lastError = error
+
+    if (
+      error.name === 'invalid_from_address' &&
+      from !== fromCandidates[fromCandidates.length - 1]
+    ) {
+      console.warn(`[resend] ${operation} retrying with bare from address:`, {
+        rejectedFrom: from,
+        retryFrom: getFromEmailAddressOnly(),
+        error: error.message,
+      })
+      continue
+    }
+
+    break
+  }
+
+  const message = formatResendApiError(lastError!)
+  logResendFailure(
+    operation,
+    {
+      to: payload.to,
+      subject: payload.subject,
+      from: payload.from,
+      replyTo: payload.replyTo ?? null,
+    },
+    lastError,
+  )
+  throw new Error(message)
 }
 
 export async function sendEmail(options: {
@@ -229,31 +348,20 @@ export async function sendEmail(options: {
   react: ReactElement
 }): Promise<SendEmailResult> {
   assertResendConfig('sendEmail')
+  warnSandboxRecipientMismatch(options.to)
 
-  validateRecipientForSandbox(options.to)
-
-  const html = await renderEmailHtml(options.react)
   const from = getFromEmail()
+  const { html, text } = await renderEmailHtml(options.react, options.subject)
 
-  const { data, error } = await getResend().emails.send({
+  const { id } = await sendViaResend('sendEmail', {
     from,
     to: options.to,
     subject: options.subject,
     html,
+    text,
   })
 
-  if (error) {
-    const message = formatResendApiError(error)
-    logResendFailure('sendEmail', {
-      to: options.to,
-      subject: options.subject,
-      from,
-      resendId: data?.id ?? null,
-    }, error)
-    throw new Error(message)
-  }
-
-  return { ok: true }
+  return { ok: true, id }
 }
 
 export async function sendAdminNotification(options: {
@@ -270,30 +378,46 @@ export async function sendAdminNotification(options: {
   }
 
   assertResendConfig('sendAdminNotification')
-  validateRecipientForSandbox(recipients)
+  warnSandboxRecipientMismatch(recipients)
 
-  const html = await renderEmailHtml(options.react)
   const from = getFromEmail()
+  const { html, text } = await renderEmailHtml(options.react, options.subject)
 
-  const { data, error } = await getResend().emails.send({
+  const { id } = await sendViaResend('sendAdminNotification', {
     from,
     to: recipients,
     subject: options.subject,
     html,
+    text,
     replyTo: options.replyTo,
   })
 
-  if (error) {
-    const message = formatResendApiError(error)
-    logResendFailure('sendAdminNotification', {
-      to: recipients,
-      subject: options.subject,
-      from,
-      replyTo: options.replyTo ?? null,
-      resendId: data?.id ?? null,
-    }, error)
-    throw new Error(message)
-  }
+  return { ok: true, id }
+}
 
-  return { ok: true }
+/** Used by scripts/test-resend.mjs — send a plain test message without React templates. */
+export async function sendTestEmail(options: {
+  to: string
+  subject?: string
+}): Promise<SendEmailResult> {
+  assertResendConfig('sendTestEmail')
+  warnSandboxRecipientMismatch(options.to)
+
+  const from = getFromEmail()
+  const subject = options.subject ?? 'Resend test — Bags of Groceries Tasmania'
+  const html = buildFallbackHtml(
+    'This is a test email from Bags of Groceries Tasmania. If you received this, Resend is configured correctly.',
+  )
+  const text =
+    'This is a test email from Bags of Groceries Tasmania. If you received this, Resend is configured correctly.'
+
+  const { id } = await sendViaResend('sendTestEmail', {
+    from,
+    to: options.to,
+    subject,
+    html,
+    text,
+  })
+
+  return { ok: true, id }
 }

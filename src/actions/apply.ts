@@ -3,11 +3,7 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import {
-  ResendSandboxError,
-  sendAdminNotification,
-  sendEmail,
-} from '@/lib/resend'
+import { sendAdminNotification, sendEmail } from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { applicationSchema } from '@/lib/validations'
 import ApplicationConfirmationEmail from '@/emails/application-confirmation'
@@ -15,6 +11,16 @@ import AdminNewApplicationEmail from '@/emails/admin-new-application'
 
 function missingEnv(name: string): string {
   return `${name} is not set in environment variables`
+}
+
+function handleEmailFailure(context: string, details: Record<string, unknown>, err: unknown): void {
+  console.error(context, {
+    ...details,
+    message: err instanceof Error ? err.message : String(err),
+  })
+  if (process.env.NODE_ENV === 'development') {
+    throw err
+  }
 }
 
 export async function submitApplication(
@@ -89,11 +95,11 @@ export async function submitApplication(
         }),
       })
     } catch (emailErr) {
-      console.error('Applicant confirmation email failed (application saved):', {
-        recipient: data.email,
-        sandboxBlocked: emailErr instanceof ResendSandboxError,
-        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-      })
+      handleEmailFailure(
+        'Applicant confirmation email failed (application saved)',
+        { recipient: data.email },
+        emailErr,
+      )
     }
 
     try {
@@ -103,9 +109,11 @@ export async function submitApplication(
         replyTo: data.email,
       })
     } catch (emailErr) {
-      console.error('Admin application notification failed (application saved):', {
-        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-      })
+      handleEmailFailure(
+        'Admin application notification failed (application saved)',
+        {},
+        emailErr,
+      )
     }
 
     return { success: true }

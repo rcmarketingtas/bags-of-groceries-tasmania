@@ -5,7 +5,6 @@ import { createElement } from 'react'
 import { getStripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
-  ResendSandboxError,
   assertResendConfig,
   sendAdminNotification,
   sendEmail,
@@ -235,8 +234,7 @@ export async function POST(request: NextRequest) {
       stripePaymentId,
       recipient: meta.email,
       isDuplicateDonation,
-      sandboxBlocked: emailErr instanceof ResendSandboxError,
-      message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
     })
   }
 

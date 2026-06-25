@@ -3,11 +3,7 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import {
-  ResendSandboxError,
-  sendAdminNotification,
-  sendEmail,
-} from '@/lib/resend'
+import { sendAdminNotification, sendEmail } from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { contactSchema } from '@/lib/validations'
 import ContactConfirmationEmail from '@/emails/contact-confirmation'
@@ -15,6 +11,16 @@ import AdminNewContactEmail from '@/emails/admin-new-contact'
 
 function missingEnv(name: string): string {
   return `${name} is not set in environment variables`
+}
+
+function handleEmailFailure(context: string, details: Record<string, unknown>, err: unknown): void {
+  console.error(context, {
+    ...details,
+    message: err instanceof Error ? err.message : String(err),
+  })
+  if (process.env.NODE_ENV === 'development') {
+    throw err
+  }
 }
 
 export async function submitContact(
@@ -64,11 +70,11 @@ export async function submitContact(
         react: createElement(ContactConfirmationEmail, { name }),
       })
     } catch (emailErr) {
-      console.error('Contact confirmation email failed (message saved):', {
-        recipient: email,
-        sandboxBlocked: emailErr instanceof ResendSandboxError,
-        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-      })
+      handleEmailFailure(
+        'Contact confirmation email failed (message saved)',
+        { recipient: email },
+        emailErr,
+      )
     }
 
     try {
@@ -78,9 +84,11 @@ export async function submitContact(
         replyTo: email,
       })
     } catch (emailErr) {
-      console.error('Admin contact notification failed (message saved):', {
-        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-      })
+      handleEmailFailure(
+        'Admin contact notification failed (message saved)',
+        {},
+        emailErr,
+      )
     }
 
     return { success: true }
