@@ -205,7 +205,7 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
           {isPending ? (
             <><Loader2 className="h-4 w-4 animate-spin" />Redirecting to payment...</>
           ) : (
-            <><ShoppingBag className="h-4 w-4" />Buy {quantity} {quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${total}.00)</>
+            <><ShoppingBag className="h-4 w-4" />Give {quantity} {quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${total}.00)</>
           )}
         </Button>
 

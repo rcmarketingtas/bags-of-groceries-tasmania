@@ -26,7 +26,7 @@ export function Hero({ familiesCount }: HeroProps) {
             </p>
 
             <p className="mb-10 text-base text-white/90">
-              Buy a bag and we&apos;ll make sure it gets to a family that needs
+              Give a bag and we&apos;ll make sure it gets to a family that needs
               it.
             </p>
 

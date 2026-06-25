@@ -78,8 +78,8 @@ export async function DonorLeaderboard({
             </p>
             <p className="mb-6 text-sm leading-relaxed text-[#1c4d31]/80">
               {onSponsorPage
-                ? 'Complete the form below to buy a bag — your gift helps a Tasmanian family and shows up on this leaderboard.'
-                : "Every bag of groceries makes a real difference. Buy a bag today and we'll make sure it reaches a family that needs it."}
+                ? 'Complete the form below to give a bag — your gift helps a Tasmanian family and shows up on this leaderboard.'
+                : "Every bag of groceries makes a real difference. Give a bag today and we'll make sure it reaches a family that needs it."}
             </p>
             {onSponsorPage ? (
               <Button
@@ -87,7 +87,7 @@ export async function DonorLeaderboard({
                 size="lg"
                 className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
               >
-                <a href="#donation-form">Buy Your First Bag</a>
+                <a href="#donation-form">Give Your First Bag</a>
               </Button>
             ) : (
               <Button
@@ -95,7 +95,7 @@ export async function DonorLeaderboard({
                 size="lg"
                 className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
               >
-                <Link href="/sponsor">Buy a Bag of Groceries</Link>
+                <Link href="/sponsor">Give a Bag of Groceries</Link>
               </Button>
             )}
           </div>
@@ -140,7 +140,7 @@ export async function DonorLeaderboard({
                   size="lg"
                   className="btn-glow border border-white/25 bg-white/10 text-white hover:bg-white/20"
                 >
-                  <Link href="/sponsor">Join Them — Buy a Bag</Link>
+                  <Link href="/sponsor">Join Them — Give a Bag</Link>
                 </Button>
               </div>
             )}

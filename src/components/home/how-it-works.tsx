@@ -3,9 +3,9 @@ import { ShoppingBag, Package, Heart } from 'lucide-react'
 const steps = [
   {
     icon: ShoppingBag,
-    title: 'Buy a Bag of Groceries',
+    title: 'Give a Bag of Groceries',
     description:
-      'Pick how many bags you want to buy. Your money goes straight toward groceries for a Tassie family doing it tough.',
+      'Pick how many bags you want to give. Your money goes straight toward groceries for a Tassie family doing it tough.',
   },
   {
     icon: Package,

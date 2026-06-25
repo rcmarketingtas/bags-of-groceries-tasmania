@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 const siteUrl = getSiteUrl()
-const FB_SHARE_URL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteUrl)}&quote=${encodeURIComponent('I just bought a bag of groceries for a Tasmanian family in need. You can too!')}`
+const FB_SHARE_URL = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(siteUrl)}&quote=${encodeURIComponent('I just gave a bag of groceries for a Tasmanian family in need. You can too!')}`
 
 export default function ThankYouPage() {
   return (
@@ -62,7 +62,7 @@ export default function ThankYouPage() {
             >
               <Link href="/sponsor">
                 <Heart className="h-4 w-4" />
-                Buy Another Bag of Groceries
+                Give Another Bag of Groceries
               </Link>
             </Button>
             <Button

@@ -7,8 +7,8 @@ import { getTotalBagsDelivered } from '@/lib/donations'
 import { getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
 
 export const metadata: Metadata = {
-  title: 'Buy a Bag of Groceries',
-  description: 'Buy a bag of groceries for a Tasmanian family doing it tough. $50 per bag.',
+  title: 'Give a Bag of Groceries',
+  description: 'Give a bag of groceries for a Tasmanian family doing it tough. $50 per bag.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -24,7 +24,7 @@ export default async function SponsorPage() {
       <section className="section-sage py-16 text-center">
         <div className="mx-auto max-w-2xl px-4">
           <h1 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Buy a Bag of Groceries for a Family
+            Give a Bag of Groceries for a Family
           </h1>
           {/* Transparency strip */}
           <div className="mt-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-6">

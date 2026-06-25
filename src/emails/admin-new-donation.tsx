@@ -40,7 +40,7 @@ export default function AdminNewDonationEmail({
           </Section>
           <Section style={content}>
             <Text style={text}>
-              Someone just bought {bags} bag{bags !== 1 ? 's' : ''} of groceries. Payment confirmed via Stripe.
+              Someone just gave {bags} bag{bags !== 1 ? 's' : ''} of groceries. Payment confirmed via Stripe.
             </Text>
 
             <Section style={detailBox}>

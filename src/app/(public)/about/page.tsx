@@ -68,7 +68,7 @@ export default function AboutPage() {
               <p>
                 We&apos;re based in Launceston but this is for all of Tassie.
                 If you&apos;re doing it tough, reach out. If you want to help,
-                buy a bag of groceries. It&apos;s really that simple.
+                give a bag of groceries. It&apos;s really that simple.
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export default function AboutPage() {
           <div className="space-y-4">
             {[
               {
-                title: 'Someone buys a bag of groceries',
+                title: 'Someone gives a bag of groceries',
                 description: 'A generous person visits the site and pays for one or more grocery bags.',
               },
               {
@@ -148,7 +148,7 @@ export default function AboutPage() {
             Want to get involved?
           </h2>
           <p className="mb-8 text-[#A3C2B2]">
-            Buy a bag of groceries or reach out. We&apos;d love to hear from you.
+            Give a bag of groceries or reach out. We&apos;d love to hear from you.
           </p>
           <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button
@@ -156,7 +156,7 @@ export default function AboutPage() {
               size="lg"
               className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
             >
-              <Link href="/sponsor">Buy a Bag of Groceries</Link>
+              <Link href="/sponsor">Give a Bag of Groceries</Link>
             </Button>
             <Button
               asChild
