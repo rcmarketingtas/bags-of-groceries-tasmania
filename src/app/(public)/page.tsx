@@ -17,7 +17,7 @@ export default async function HomePage() {
     <>
       <Hero familiesCount={familiesCount} />
       <HowItWorks />
-      <DonorLeaderboard />
+      <DonorLeaderboard sort="top" />
       <WhoWeAre />
       <TasmaniaMap />
       <FAQ />

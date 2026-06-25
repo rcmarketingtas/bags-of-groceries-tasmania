@@ -40,22 +40,30 @@ export async function getTotalBagsDelivered(): Promise<number> {
   }
 }
 
+export type LeaderboardSort = 'recent' | 'top'
+
 /**
- * Recent donors for the public leaderboard — aggregated by email (total bags),
- * ordered by most recent donation. Email is never exposed.
+ * Donors for the public leaderboard — aggregated by email (total bags).
+ * `recent`: most recent donation first. `top`: highest total bags first.
+ * Email is never exposed.
  */
 export async function getLeaderboardDonations(
   limit = LEADERBOARD_DEFAULT_LIMIT,
+  sort: LeaderboardSort = 'recent',
 ): Promise<LeaderboardEntry[]> {
   noStore()
 
   try {
     const supabase = createAdminClient()
-    const { data, error } = await supabase
+    let query = supabase
       .from('donations')
       .select('first_name, last_name, email, bags, created_at')
-      .order('created_at', { ascending: false })
-      .limit(LEADERBOARD_FETCH_BATCH)
+
+    if (sort === 'recent') {
+      query = query.order('created_at', { ascending: false }).limit(LEADERBOARD_FETCH_BATCH)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       console.error('Failed to fetch leaderboard donations:', error.message)
@@ -75,6 +83,9 @@ export async function getLeaderboardDonations(
 
       if (existing) {
         existing.bags += row.bags ?? 0
+        if (row.created_at > existing.lastDonationAt) {
+          existing.lastDonationAt = row.created_at
+        }
       } else {
         byEmail.set(email, {
           displayName: formatDonorDisplayName(row.first_name, row.last_name),
@@ -84,13 +95,25 @@ export async function getLeaderboardDonations(
       }
     }
 
-    return Array.from(byEmail.values())
-      .sort(
+    const entries = Array.from(byEmail.values())
+
+    if (sort === 'top') {
+      entries.sort((a, b) => {
+        if (b.bags !== a.bags) return b.bags - a.bags
+        return (
+          new Date(b.lastDonationAt).getTime() -
+          new Date(a.lastDonationAt).getTime()
+        )
+      })
+    } else {
+      entries.sort(
         (a, b) =>
           new Date(b.lastDonationAt).getTime() -
           new Date(a.lastDonationAt).getTime(),
       )
-      .slice(0, limit)
+    }
+
+    return entries.slice(0, limit)
   } catch (err) {
     console.error('Failed to fetch leaderboard donations:', err)
     return []

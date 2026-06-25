@@ -1,21 +1,26 @@
 import Link from 'next/link'
 import { Heart, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getLeaderboardDonations } from '@/lib/donations'
+import { getLeaderboardDonations, type LeaderboardSort } from '@/lib/donations'
 import { formatRelativeTime } from '@/lib/utils'
 
 type DonorLeaderboardProps = {
   variant?: 'sage' | 'white'
+  /** `top` ranks by total bags; `recent` ranks by most recent donation. */
+  sort?: LeaderboardSort
   /** When true, empty state scrolls to the donation form instead of linking to /sponsor. */
   onSponsorPage?: boolean
 }
 
 export async function DonorLeaderboard({
   variant = 'sage',
+  sort = 'recent',
   onSponsorPage = false,
 }: DonorLeaderboardProps) {
-  const donors = await getLeaderboardDonations(10)
+  const donors = await getLeaderboardDonations(10, sort)
   const isSage = variant === 'sage'
+  const isTop = sort === 'top'
+  const heading = isTop ? 'Top Supporters' : 'Recent Supporters'
 
   return (
     <section
@@ -47,7 +52,7 @@ export async function DonorLeaderboard({
                 : 'mb-2 text-2xl font-bold tracking-tight text-black sm:text-3xl'
             }
           >
-            Recent Supporters
+            {heading}
           </h2>
           <p
             className={
@@ -97,7 +102,7 @@ export async function DonorLeaderboard({
         ) : (
           <>
             <ul className="space-y-2">
-              {donors.map((donor) => (
+              {donors.map((donor, index) => (
                 <li
                   key={`${donor.displayName}-${donor.lastDonationAt}`}
                   className="card-light flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-3.5"
@@ -106,7 +111,7 @@ export async function DonorLeaderboard({
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#3d6b51]/15 text-xs font-bold text-[#1c4d31]"
                     aria-hidden="true"
                   >
-                    {donor.displayName.charAt(0).toUpperCase()}
+                    {isTop ? `#${index + 1}` : donor.displayName.charAt(0).toUpperCase()}
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -114,7 +119,9 @@ export async function DonorLeaderboard({
                       {donor.displayName}
                     </p>
                     <p className="text-xs text-[#1c4d31]/70">
-                      {formatRelativeTime(donor.lastDonationAt)}
+                      {isTop
+                        ? `${donor.bags} ${donor.bags === 1 ? 'bag' : 'bags'} donated`
+                        : formatRelativeTime(donor.lastDonationAt)}
                     </p>
                   </div>
 
