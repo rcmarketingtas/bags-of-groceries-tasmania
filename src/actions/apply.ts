@@ -3,7 +3,11 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendAdminNotification, sendEmail } from '@/lib/resend'
+import {
+  ResendSandboxError,
+  sendAdminNotification,
+  sendEmail,
+} from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { applicationSchema } from '@/lib/validations'
 import ApplicationConfirmationEmail from '@/emails/application-confirmation'
@@ -85,7 +89,11 @@ export async function submitApplication(
         }),
       })
     } catch (emailErr) {
-      console.error('Applicant confirmation email error:', emailErr)
+      console.error('Applicant confirmation email failed (application saved):', {
+        recipient: data.email,
+        sandboxBlocked: emailErr instanceof ResendSandboxError,
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
     }
 
     try {
@@ -95,7 +103,9 @@ export async function submitApplication(
         replyTo: data.email,
       })
     } catch (emailErr) {
-      console.error('Admin application notification error:', emailErr)
+      console.error('Admin application notification failed (application saved):', {
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
     }
 
     return { success: true }

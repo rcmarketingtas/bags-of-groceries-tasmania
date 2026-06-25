@@ -3,7 +3,12 @@ import type Stripe from 'stripe'
 import { createElement } from 'react'
 import { getStripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendAdminNotification, sendEmail } from '@/lib/resend'
+import {
+  ResendSandboxError,
+  assertResendConfig,
+  sendAdminNotification,
+  sendEmail,
+} from '@/lib/resend'
 import DonationReceiptEmail from '@/emails/donation-receipt'
 import AdminNewDonationEmail from '@/emails/admin-new-donation'
 
@@ -82,6 +87,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    assertResendConfig('stripe webhook')
+
     try {
       await sendEmail({
         to: meta.email,
@@ -92,8 +99,23 @@ export async function POST(request: NextRequest) {
           amount,
         }),
       })
+    } catch (emailErr) {
+      console.error('Donor receipt email failed (donation saved):', {
+        sessionId: session.id,
+        stripePaymentId,
+        recipient: meta.email,
+        isDuplicateDonation,
+        sandboxBlocked: emailErr instanceof ResendSandboxError,
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
+      return NextResponse.json(
+        { error: 'Donor receipt email failed' },
+        { status: 500 },
+      )
+    }
 
-      if (!isDuplicateDonation) {
+    if (!isDuplicateDonation) {
+      try {
         await sendAdminNotification({
           subject: `New donation: ${bags} bag${bags !== 1 ? 's' : ''} from ${meta.first_name} ${meta.last_name}`,
           react: createElement(AdminNewDonationEmail, {
@@ -106,16 +128,14 @@ export async function POST(request: NextRequest) {
           }),
           replyTo: meta.email,
         })
+      } catch (emailErr) {
+        // Donation is recorded and donor got a receipt — do not fail the webhook.
+        console.error('Admin donation notification failed (donation saved):', {
+          sessionId: session.id,
+          stripePaymentId,
+          message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+        })
       }
-    } catch (emailErr) {
-      console.error('Donation email send failed:', {
-        sessionId: session.id,
-        stripePaymentId,
-        recipient: meta.email,
-        isDuplicateDonation,
-        error: emailErr,
-      })
-      return NextResponse.json({ error: 'Email send failed' }, { status: 500 })
     }
   }
 

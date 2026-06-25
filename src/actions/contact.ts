@@ -3,7 +3,11 @@
 import { createElement } from 'react'
 import { headers } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendAdminNotification, sendEmail } from '@/lib/resend'
+import {
+  ResendSandboxError,
+  sendAdminNotification,
+  sendEmail,
+} from '@/lib/resend'
 import { rateLimit } from '@/lib/rate-limit'
 import { contactSchema } from '@/lib/validations'
 import ContactConfirmationEmail from '@/emails/contact-confirmation'
@@ -60,7 +64,11 @@ export async function submitContact(
         react: createElement(ContactConfirmationEmail, { name }),
       })
     } catch (emailErr) {
-      console.error('Contact confirmation email error:', emailErr)
+      console.error('Contact confirmation email failed (message saved):', {
+        recipient: email,
+        sandboxBlocked: emailErr instanceof ResendSandboxError,
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
     }
 
     try {
@@ -70,7 +78,9 @@ export async function submitContact(
         replyTo: email,
       })
     } catch (emailErr) {
-      console.error('Admin contact notification error:', emailErr)
+      console.error('Admin contact notification failed (message saved):', {
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
     }
 
     return { success: true }
