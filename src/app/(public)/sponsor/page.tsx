@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { ShieldCheck, Lock, ShoppingBag, Utensils, Users, TrendingUp } from 'lucide-react'
+import { DonorLeaderboard } from '@/components/home/donor-leaderboard'
 import { DonationForm } from '@/components/sponsor/donation-form'
 import { FB_PAGE_URL } from '@/lib/facebook'
 import { getTotalBagsDelivered } from '@/lib/donations'
@@ -88,8 +89,11 @@ export default async function SponsorPage() {
         </div>
       </section>
 
+      {/* Recent supporters — Sage A (alternates after white stat banner) */}
+      <DonorLeaderboard variant="sage" onSponsorPage />
+
       {/* Form — Sage A */}
-      <section className="section-sage py-12 pb-20">
+      <section id="donation-form" className="section-sage py-12 pb-20">
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
           {stripeConfigErrors.length > 0 && (
             <div className="mb-6 rounded-xl border border-amber-300/40 bg-amber-400/10 p-4 text-sm text-amber-100">

@@ -1,5 +1,6 @@
 import { Hero } from '@/components/home/hero'
 import { HowItWorks } from '@/components/home/how-it-works'
+import { DonorLeaderboard } from '@/components/home/donor-leaderboard'
 import { WhoWeAre } from '@/components/home/who-we-are'
 import { FAQ } from '@/components/home/faq'
 import { ContactCTA } from '@/components/home/contact-cta'
@@ -16,6 +17,7 @@ export default async function HomePage() {
     <>
       <Hero familiesCount={familiesCount} />
       <HowItWorks />
+      <DonorLeaderboard />
       <WhoWeAre />
       <TasmaniaMap />
       <FAQ />
