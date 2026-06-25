@@ -50,7 +50,46 @@ export default async function SponsorPage() {
         </div>
       </section>
 
-      {/* Hunger stat banner — White B (no external image dependency) */}
+      {/* Recent supporters — White B (alternates after sage header) */}
+      <DonorLeaderboard variant="white" onSponsorPage />
+
+      {/* Form — Sage A */}
+      <section id="donation-form" className="section-sage py-12 pb-20">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+          {stripeConfigErrors.length > 0 && (
+            <div className="mb-6 rounded-xl border border-amber-300/40 bg-amber-400/10 p-4 text-sm text-amber-100">
+              <p className="font-semibold text-white">Stripe is not configured yet</p>
+              <p className="mt-1 text-amber-100/90">
+                Add these environment variables in Vercel, then redeploy:
+              </p>
+              <ul className="mt-2 list-inside list-disc space-y-1 text-amber-100/80">
+                {stripeConfigErrors.map((err) => (
+                  <li key={err}>{err}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="card-dark p-6 sm:p-8">
+            <DonationForm priceFamilyBagId={priceFamilyBagId} />
+          </div>
+
+          {/* Trust signals */}
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <div className="flex items-center gap-2 text-sm text-[#A3C2B2]">
+              <Lock className="h-4 w-4 text-white" />
+              Secure payment via Stripe
+            </div>
+            <div className="hidden h-4 w-px bg-white/20 sm:block" />
+            <div className="flex items-center gap-2 text-sm text-[#A3C2B2]">
+              <ShieldCheck className="h-4 w-4 text-white" />
+              Your details are protected
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hunger stat banner — White B (after checkout to reduce friction) */}
       <section className="section-white py-14">
         <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-2xl border border-[#D5E0DA] bg-[#F4F7F5]">
@@ -84,45 +123,6 @@ export default async function SponsorPage() {
                   <p className="mt-1 text-xs text-[#1c4d31]/50">{sub}</p>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Recent supporters — Sage A (alternates after white stat banner) */}
-      <DonorLeaderboard variant="sage" onSponsorPage />
-
-      {/* Form — Sage A */}
-      <section id="donation-form" className="section-sage py-12 pb-20">
-        <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
-          {stripeConfigErrors.length > 0 && (
-            <div className="mb-6 rounded-xl border border-amber-300/40 bg-amber-400/10 p-4 text-sm text-amber-100">
-              <p className="font-semibold text-white">Stripe is not configured yet</p>
-              <p className="mt-1 text-amber-100/90">
-                Add these environment variables in Vercel, then redeploy:
-              </p>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-amber-100/80">
-                {stripeConfigErrors.map((err) => (
-                  <li key={err}>{err}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div className="card-dark p-6 sm:p-8">
-            <DonationForm priceFamilyBagId={priceFamilyBagId} />
-          </div>
-
-          {/* Trust signals */}
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <div className="flex items-center gap-2 text-sm text-[#A3C2B2]">
-              <Lock className="h-4 w-4 text-white" />
-              Secure payment via Stripe
-            </div>
-            <div className="hidden h-4 w-px bg-white/20 sm:block" />
-            <div className="flex items-center gap-2 text-sm text-[#A3C2B2]">
-              <ShieldCheck className="h-4 w-4 text-white" />
-              Your details are protected
             </div>
           </div>
         </div>
