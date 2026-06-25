@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ShoppingBag, Facebook } from 'lucide-react'
+import { FB_PAGE_URL } from '@/lib/facebook'
 
 export function Footer() {
   return (
@@ -20,7 +21,7 @@ export function Footer() {
             </p>
             {/* Facebook page link */}
             <a
-              href="https://www.facebook.com/bagsofgroceriestasmania"
+              href={FB_PAGE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 text-sm text-[#A3C2B2] transition-colors hover:text-white"

@@ -1,12 +1,11 @@
 import { Facebook } from 'lucide-react'
+import { FB_PAGE_URL } from '@/lib/facebook'
 import { FamilyGoalTracker } from './family-goal-tracker'
 import { HeroCTAs } from './hero-ctas'
 
 interface HeroProps {
   familiesCount: number
 }
-
-const FB_PAGE_URL = 'https://www.facebook.com/bagsofgroceriestasmania'
 
 export function Hero({ familiesCount }: HeroProps) {
   return (

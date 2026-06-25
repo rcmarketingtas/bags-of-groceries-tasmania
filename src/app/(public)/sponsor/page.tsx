@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ShieldCheck, Lock, ShoppingBag, Utensils, Users, TrendingUp } from 'lucide-react'
 import { DonationForm } from '@/components/sponsor/donation-form'
+import { FB_PAGE_URL } from '@/lib/facebook'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
 
@@ -47,7 +48,7 @@ export default async function SponsorPage() {
             <div className="hidden h-4 w-px bg-white/20 sm:block" />
             <div className="text-sm">
               <a
-                href="https://www.facebook.com/bagsofgroceriestasmania"
+                href={FB_PAGE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-white underline underline-offset-2 transition-opacity hover:opacity-75"
