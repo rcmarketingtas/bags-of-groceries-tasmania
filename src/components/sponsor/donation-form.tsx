@@ -118,9 +118,9 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
           <Image
             src="/grocery-bag.jpg"
             alt="A $50 bag of groceries including fresh fruit, vegetables, chicken, mince, eggs, milk, pasta, bread, and pantry staples"
-            width={800}
-            height={600}
-            className="aspect-[4/3] w-full object-cover"
+            width={768}
+            height={1024}
+            className="aspect-[3/4] w-full object-cover"
           />
         </div>
         <p className="mt-2 text-center text-sm text-[#A3C2B2]/70">
