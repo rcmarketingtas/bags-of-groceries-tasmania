@@ -40,9 +40,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-black">Email</p>
-                      <p className="text-sm text-[#1c4d31]/80">
-                        hello@bagsofgroceries.org.au
-                      </p>
+                      <a
+                        href="mailto:bagsofgroceries@gmail.com"
+                        className="text-sm text-[#1c4d31]/80 transition-colors hover:text-[#1c4d31]"
+                      >
+                        bagsofgroceries@gmail.com
+                      </a>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
