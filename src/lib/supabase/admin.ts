@@ -13,11 +13,12 @@ export function createAdminClient(): SupabaseClient {
       'NEXT_PUBLIC_SUPABASE_URL is not configured — cannot connect to Supabase',
     )
   }
-  if (!serviceRoleKey) {
+  const trimmedKey = serviceRoleKey?.trim()
+  if (!trimmedKey) {
     throw new Error(
       'SUPABASE_SERVICE_ROLE_KEY is not configured — webhook inserts will fail',
     )
   }
 
-  return createClient(url, serviceRoleKey)
+  return createClient(url, trimmedKey)
 }

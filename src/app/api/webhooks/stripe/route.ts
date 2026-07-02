@@ -15,11 +15,12 @@ import AdminNewDonationEmail from '@/emails/admin-new-donation'
 
 export const dynamic = 'force-dynamic'
 
-const REQUIRED_METADATA_KEYS = [
-  'first_name',
-  'last_name',
-  'email',
-] as const
+const CHECKOUT_EVENTS = new Set([
+  'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+])
+
+const RECORDABLE_PAYMENT_STATUSES = new Set(['paid', 'no_payment_required'])
 
 function logStep(
   step: string,
@@ -28,33 +29,294 @@ function logStep(
   console.error(`[stripe-webhook] ${step}`, details)
 }
 
-function validateSessionMetadata(
-  meta: Stripe.Metadata | null | undefined,
-  sessionId: string,
-): meta is Stripe.Metadata & {
-  first_name: string
-  last_name: string
-  email: string
+function splitCustomerName(name: string | null | undefined): {
+  firstName: string
+  lastName: string
 } {
-  if (!meta) {
-    logStep('missing metadata object', { sessionId })
-    return false
+  const trimmed = name?.trim() ?? ''
+  if (!trimmed) return { firstName: '', lastName: '' }
+
+  const parts = trimmed.split(/\s+/)
+  return {
+    firstName: parts[0] ?? '',
+    lastName: parts.slice(1).join(' '),
+  }
+}
+
+function deriveBagsFromLineItems(session: Stripe.Checkout.Session): number {
+  const lineItems = session.line_items?.data
+  if (!lineItems?.length) return 1
+
+  const total = lineItems.reduce((sum, item) => sum + (item.quantity ?? 0), 0)
+  return total > 0 ? total : 1
+}
+
+async function resolveDonationFields(
+  session: Stripe.Checkout.Session,
+): Promise<{
+  firstName: string
+  lastName: string
+  email: string
+  message: string | null
+  bags: number
+} | null> {
+  const meta = session.metadata ?? {}
+  const customerName = splitCustomerName(session.customer_details?.name)
+
+  const email =
+    meta.email?.trim() ||
+    session.customer_email?.trim() ||
+    session.customer_details?.email?.trim() ||
+    ''
+
+  const firstName = meta.first_name?.trim() || customerName.firstName
+  const lastName = meta.last_name?.trim() || customerName.lastName
+
+  const bagsMeta = meta.bags?.trim()
+  let bags: number
+
+  if (bagsMeta === '0') {
+    bags = 0
+  } else {
+    const bagsRaw = parseInt(bagsMeta ?? '', 10)
+    if (Number.isFinite(bagsRaw) && bagsRaw > 0) {
+      bags = bagsRaw
+    } else if (meta.donation_type === 'contribution') {
+      bags = 0
+    } else {
+      bags = deriveBagsFromLineItems(session)
+      if (bags <= 0) {
+        try {
+          const expanded = await getStripe().checkout.sessions.retrieve(session.id, {
+            expand: ['line_items'],
+          })
+          bags = deriveBagsFromLineItems(expanded)
+        } catch (err) {
+          logStep('failed to retrieve session line_items for bag count', {
+            sessionId: session.id,
+            message: err instanceof Error ? err.message : String(err),
+          })
+          bags = Math.max(bags, 1)
+        }
+      }
+    }
   }
 
-  const missing = REQUIRED_METADATA_KEYS.filter(
-    (key) => !meta[key]?.trim(),
-  )
-
-  if (missing.length > 0) {
-    logStep('missing required metadata keys', {
-      sessionId,
-      missing,
-      receivedKeys: Object.keys(meta),
+  if (!email || !firstName || !lastName) {
+    logStep('missing required donor fields', {
+      sessionId: session.id,
+      hasEmail: Boolean(email),
+      hasFirstName: Boolean(firstName),
+      hasLastName: Boolean(lastName),
+      metadataKeys: Object.keys(meta),
+      customerEmail: session.customer_email,
+      customerDetailsEmail: session.customer_details?.email,
     })
+    return null
+  }
+
+  return {
+    firstName,
+    lastName,
+    email: email.toLowerCase(),
+    message: meta.message?.trim() || null,
+    bags,
+  }
+}
+
+function shouldRecordDonation(session: Stripe.Checkout.Session): boolean {
+  if (session.status !== 'complete') {
     return false
   }
 
-  return true
+  return RECORDABLE_PAYMENT_STATUSES.has(session.payment_status)
+}
+
+async function recordDonationFromSession(
+  session: Stripe.Checkout.Session,
+): Promise<NextResponse> {
+  logStep('processing checkout session', {
+    sessionId: session.id,
+    eventPaymentStatus: session.payment_status,
+    eventStatus: session.status,
+    customerEmail: session.customer_email,
+    metadataKeys: session.metadata ? Object.keys(session.metadata) : [],
+  })
+
+  if (!shouldRecordDonation(session)) {
+    logStep('skipping insert — session not complete or payment not recordable', {
+      sessionId: session.id,
+      paymentStatus: session.payment_status,
+      status: session.status,
+      allowedPaymentStatuses: Array.from(RECORDABLE_PAYMENT_STATUSES),
+    })
+    return NextResponse.json({
+      received: true,
+      skipped: 'payment_status_not_recordable',
+      paymentStatus: session.payment_status,
+      status: session.status,
+    })
+  }
+
+  const donor = await resolveDonationFields(session)
+  if (!donor) {
+    return NextResponse.json(
+      {
+        error: 'Checkout session missing required donor fields',
+        step: 'donor_validation',
+        sessionId: session.id,
+      },
+      { status: 422 },
+    )
+  }
+
+  // Checkout Session ID is always present and unique — stable idempotency key.
+  const stripePaymentId = session.id
+  const legacyPaymentIntentId =
+    typeof session.payment_intent === 'string' ? session.payment_intent : null
+  const amount = (session.amount_total ?? 0) / 100
+
+  let supabase
+  try {
+    supabase = createAdminClient()
+  } catch (err) {
+    logStep('supabase admin client failed', {
+      sessionId: session.id,
+      message: err instanceof Error ? err.message : String(err),
+    })
+    return NextResponse.json(
+      { error: 'Supabase not configured', step: 'supabase_client' },
+      { status: 500 },
+    )
+  }
+
+  if (legacyPaymentIntentId) {
+    const { data: legacyRow } = await supabase
+      .from('donations')
+      .select('id')
+      .eq('stripe_payment_id', legacyPaymentIntentId)
+      .maybeSingle()
+
+    if (legacyRow) {
+      logStep('donation already recorded (legacy payment_intent id)', {
+        sessionId: session.id,
+        legacyPaymentIntentId,
+        email: donor.email,
+      })
+      return NextResponse.json({
+        received: true,
+        sessionId: session.id,
+        donationRecorded: true,
+        duplicate: true,
+        legacyPaymentIntentId,
+      })
+    }
+  }
+
+  const { error: dbError } = await supabase.from('donations').insert({
+    first_name: donor.firstName,
+    last_name: donor.lastName,
+    email: donor.email,
+    amount: session.amount_total ?? 0,
+    bags: donor.bags,
+    message: donor.message,
+    stripe_payment_id: stripePaymentId,
+  })
+
+  const isDuplicateDonation = dbError?.code === '23505'
+
+  if (dbError && !isDuplicateDonation) {
+    logStep('donations insert failed', {
+      sessionId: session.id,
+      stripePaymentId,
+      code: dbError.code,
+      message: dbError.message,
+      details: dbError.details,
+      hint: dbError.hint,
+    })
+    return NextResponse.json(
+      {
+        error: 'Failed to insert donation',
+        step: 'db_insert',
+        sessionId: session.id,
+        code: dbError.code,
+      },
+      { status: 500 },
+    )
+  }
+
+  if (isDuplicateDonation) {
+    logStep('donation already recorded (duplicate stripe_payment_id)', {
+      sessionId: session.id,
+      stripePaymentId,
+      email: donor.email,
+    })
+  } else {
+    logStep('donation inserted', {
+      sessionId: session.id,
+      stripePaymentId,
+      email: donor.email,
+      bags: donor.bags,
+      amountCents: session.amount_total ?? 0,
+    })
+    revalidatePath('/')
+    revalidatePath('/sponsor')
+  }
+
+  assertResendConfig('stripe webhook')
+
+  try {
+    await sendEmail({
+      to: donor.email,
+      subject: 'Thank you for your donation — Bags of Groceries Tasmania',
+      react: createElement(DonationReceiptEmail, {
+        firstName: donor.firstName,
+        bags: donor.bags,
+        amount,
+      }),
+    })
+  } catch (emailErr) {
+    logStep('donor receipt email failed (donation saved)', {
+      sessionId: session.id,
+      stripePaymentId,
+      recipient: donor.email,
+      isDuplicateDonation,
+      message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+    })
+  }
+
+  if (!isDuplicateDonation) {
+    try {
+      await sendAdminNotification({
+        subject:
+        donor.bags > 0
+          ? `New donation: ${donor.bags} bag${donor.bags !== 1 ? 's' : ''} from ${donor.firstName} ${donor.lastName}`
+          : `New $${amount.toFixed(0)} contribution from ${donor.firstName} ${donor.lastName}`,
+        react: createElement(AdminNewDonationEmail, {
+          firstName: donor.firstName,
+          lastName: donor.lastName,
+          email: donor.email,
+          bags: donor.bags,
+          amount,
+          message: donor.message || undefined,
+        }),
+        replyTo: donor.email,
+      })
+    } catch (emailErr) {
+      logStep('admin donation notification failed (donation saved)', {
+        sessionId: session.id,
+        stripePaymentId,
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
+    }
+  }
+
+  return NextResponse.json({
+    received: true,
+    sessionId: session.id,
+    donationRecorded: true,
+    duplicate: isDuplicateDonation,
+  })
 }
 
 export async function POST(request: NextRequest) {
@@ -66,7 +328,7 @@ export async function POST(request: NextRequest) {
       errors: configErrors,
     })
     return NextResponse.json(
-      { error: 'Webhook handler misconfigured', step: 'env_check' },
+      { error: 'Webhook handler misconfigured', step: 'env_check', errors: configErrors },
       { status: 500 },
     )
   }
@@ -107,164 +369,10 @@ export async function POST(request: NextRequest) {
     eventType: event.type,
   })
 
-  if (event.type !== 'checkout.session.completed') {
+  if (!CHECKOUT_EVENTS.has(event.type)) {
     return NextResponse.json({ received: true, ignored: event.type })
   }
 
   const session = event.data.object as Stripe.Checkout.Session
-
-  logStep('checkout.session.completed', {
-    sessionId: session.id,
-    paymentStatus: session.payment_status,
-    customerEmail: session.customer_email,
-    metadataKeys: session.metadata ? Object.keys(session.metadata) : [],
-  })
-
-  if (session.payment_status !== 'paid') {
-    logStep('skipping insert — payment not paid', {
-      sessionId: session.id,
-      paymentStatus: session.payment_status,
-    })
-    return NextResponse.json({
-      received: true,
-      skipped: 'payment_status_not_paid',
-      paymentStatus: session.payment_status,
-    })
-  }
-
-  const meta = session.metadata
-  if (!validateSessionMetadata(meta, session.id)) {
-    return NextResponse.json(
-      {
-        error: 'Checkout session missing required metadata',
-        step: 'metadata_validation',
-        sessionId: session.id,
-        required: REQUIRED_METADATA_KEYS,
-      },
-      { status: 422 },
-    )
-  }
-
-  const stripePaymentId =
-    typeof session.payment_intent === 'string'
-      ? session.payment_intent
-      : session.id
-  const bags = parseInt(meta.bags ?? '1', 10)
-  const amount = (session.amount_total ?? 0) / 100
-
-  let supabase
-  try {
-    supabase = createAdminClient()
-  } catch (err) {
-    logStep('supabase admin client failed', {
-      sessionId: session.id,
-      message: err instanceof Error ? err.message : String(err),
-    })
-    return NextResponse.json(
-      { error: 'Supabase not configured', step: 'supabase_client' },
-      { status: 500 },
-    )
-  }
-
-  const { error: dbError } = await supabase.from('donations').insert({
-    first_name: meta.first_name.trim(),
-    last_name: meta.last_name.trim(),
-    email: meta.email.trim().toLowerCase(),
-    amount: session.amount_total ?? 0,
-    bags,
-    message: meta.message?.trim() || null,
-    stripe_payment_id: stripePaymentId,
-  })
-
-  const isDuplicateDonation = dbError?.code === '23505'
-
-  if (dbError && !isDuplicateDonation) {
-    logStep('donations insert failed', {
-      sessionId: session.id,
-      stripePaymentId,
-      code: dbError.code,
-      message: dbError.message,
-      details: dbError.details,
-      hint: dbError.hint,
-    })
-    return NextResponse.json(
-      {
-        error: 'Failed to insert donation',
-        step: 'db_insert',
-        sessionId: session.id,
-        code: dbError.code,
-      },
-      { status: 500 },
-    )
-  }
-
-  if (isDuplicateDonation) {
-    logStep('donation already recorded (duplicate stripe_payment_id)', {
-      sessionId: session.id,
-      stripePaymentId,
-      email: meta.email,
-    })
-  } else {
-    logStep('donation inserted', {
-      sessionId: session.id,
-      stripePaymentId,
-      email: meta.email,
-      bags,
-      amountCents: session.amount_total ?? 0,
-    })
-    revalidatePath('/')
-    revalidatePath('/sponsor')
-  }
-
-  assertResendConfig('stripe webhook')
-
-  try {
-    await sendEmail({
-      to: meta.email,
-      subject: 'Thank you for your donation — Bags of Groceries Tasmania',
-      react: createElement(DonationReceiptEmail, {
-        firstName: meta.first_name,
-        bags,
-        amount,
-      }),
-    })
-  } catch (emailErr) {
-    logStep('donor receipt email failed (donation saved)', {
-      sessionId: session.id,
-      stripePaymentId,
-      recipient: meta.email,
-      isDuplicateDonation,
-        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-    })
-  }
-
-  if (!isDuplicateDonation) {
-    try {
-      await sendAdminNotification({
-        subject: `New donation: ${bags} bag${bags !== 1 ? 's' : ''} from ${meta.first_name} ${meta.last_name}`,
-        react: createElement(AdminNewDonationEmail, {
-          firstName: meta.first_name,
-          lastName: meta.last_name,
-          email: meta.email,
-          bags,
-          amount,
-          message: meta.message || undefined,
-        }),
-        replyTo: meta.email,
-      })
-    } catch (emailErr) {
-      logStep('admin donation notification failed (donation saved)', {
-        sessionId: session.id,
-        stripePaymentId,
-        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-      })
-    }
-  }
-
-  return NextResponse.json({
-    received: true,
-    sessionId: session.id,
-    donationRecorded: true,
-    duplicate: isDuplicateDonation,
-  })
+  return recordDonationFromSession(session)
 }

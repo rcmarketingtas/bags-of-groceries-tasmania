@@ -2,14 +2,16 @@
 
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
-import { ShoppingBag, Minus, Plus, Loader2, AlertCircle, Check } from 'lucide-react'
+import { ShoppingBag, Minus, Plus, Loader2, AlertCircle, Check, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createCheckoutSession } from '@/actions/donate'
+import type { DonationTierId } from '@/lib/stripe'
 
 const BAG_PRICE = 50
+const CONTRIBUTE_PRICE = 25
 const MAX_BAGS = 1000
 
 const BAG_CONTENTS = [
@@ -75,28 +77,44 @@ function ProgressDial({ quantity }: { quantity: number }) {
 
 interface DonationFormProps {
   priceFamilyBagId: string
+  priceContribute25Id?: string
 }
 
-export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
+export function DonationForm({
+  priceFamilyBagId,
+  priceContribute25Id,
+}: DonationFormProps) {
+  const [selectedTier, setSelectedTier] = useState<DonationTierId>(
+    priceContribute25Id ? 'CONTRIBUTE_25' : 'FAMILY_BAG',
+  )
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState<string>()
   const [isPending, startTransition] = useTransition()
 
-  const total = quantity * BAG_PRICE
+  const isFullBag = selectedTier === 'FAMILY_BAG'
+  const selectedPriceId =
+    selectedTier === 'CONTRIBUTE_25' && priceContribute25Id
+      ? priceContribute25Id
+      : priceFamilyBagId
+  const total = isFullBag ? quantity * BAG_PRICE : CONTRIBUTE_PRICE
 
   function decrement() { setQuantity((q) => Math.max(1, q - 1)) }
   function increment() { setQuantity((q) => Math.min(MAX_BAGS, q + 1)) }
 
   async function handleSubmit(formData: FormData) {
     setError(undefined)
-    formData.set('priceId', priceFamilyBagId)
-    formData.set('quantity', quantity.toString())
+    formData.set('priceId', selectedPriceId)
+    formData.set('quantity', isFullBag ? quantity.toString() : '1')
     startTransition(async () => {
       const result = await createCheckoutSession(formData)
       if (result.error) setError(result.error)
       else if (result.url) window.location.href = result.url
     })
   }
+
+  const submitLabel = isFullBag
+    ? `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries ($${total}.00)`
+    : `Give $${CONTRIBUTE_PRICE} to Support the Program`
 
   return (
     <div className="space-y-8">
@@ -113,57 +131,106 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
         </ul>
       </div>
 
+      {/* Tier selection */}
       <div>
-        <div className="overflow-hidden rounded-xl border border-[#163d27]">
-          <Image
-            src="/grocery-bag.jpg"
-            alt="A $50 bag of groceries including fresh fruit, vegetables, chicken, mince, eggs, milk, pasta, bread, and pantry staples"
-            width={768}
-            height={1024}
-            className="aspect-[3/4] w-full object-cover"
-          />
+        <h2 className="mb-4 text-lg font-semibold text-white">Choose how to give</h2>
+        <div className={`grid gap-3 ${priceContribute25Id ? 'sm:grid-cols-2' : ''}`}>
+          {priceContribute25Id ? (
+            <button
+              type="button"
+              onClick={() => setSelectedTier('CONTRIBUTE_25')}
+              className={`rounded-xl border p-4 text-left transition-colors ${
+                selectedTier === 'CONTRIBUTE_25'
+                  ? 'border-[#A3C2B2] bg-[#163d27]/80'
+                  : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+              }`}
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <Heart className="h-4 w-4 text-[#A3C2B2]" />
+                <span className="font-semibold text-white">$25</span>
+              </div>
+              <p className="text-sm text-[#A3C2B2]">Support the program</p>
+              <p className="mt-1 text-xs text-[#A3C2B2]/70">
+                Every dollar helps us reach more families.
+              </p>
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={() => setSelectedTier('FAMILY_BAG')}
+            className={`rounded-xl border p-4 text-left transition-colors ${
+              selectedTier === 'FAMILY_BAG'
+                ? 'border-white bg-white/10'
+                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+            }`}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-white" />
+              <span className="font-semibold text-white">$50</span>
+            </div>
+            <p className="text-sm text-[#A3C2B2]">Full bag for a family</p>
+            <p className="mt-1 text-xs text-[#A3C2B2]/70">
+              A complete grocery bag delivered to a Tasmanian household.
+            </p>
+          </button>
         </div>
-        <p className="mt-2 text-center text-sm text-[#A3C2B2]/70">
-          What a $50 bag of groceries looks like
-        </p>
       </div>
 
-      {/* Progress dial */}
-      <div>
-        <h2 className="mb-4 text-lg font-semibold text-white">
-          How many bags of groceries?
-        </h2>
-        <ProgressDial quantity={quantity} />
-        <div className="mt-6 flex items-center justify-center gap-6">
-          <button
-            type="button"
-            onClick={decrement}
-            disabled={quantity <= 1}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Remove one bag"
-          >
-            <Minus className="h-4 w-4" />
-          </button>
-          <div className="min-w-[120px] text-center">
-            <p className="text-sm text-[#A3C2B2]">{quantity} × $50 =</p>
-            <p className="text-2xl font-bold text-white">${total}.00</p>
+      {isFullBag ? (
+        <>
+          <div>
+            <div className="overflow-hidden rounded-xl border border-[#163d27]">
+              <Image
+                src="/grocery-bag.jpg"
+                alt="A $50 bag of groceries including fresh fruit, vegetables, chicken, mince, eggs, milk, pasta, bread, and pantry staples"
+                width={768}
+                height={1024}
+                className="aspect-[3/4] w-full object-cover"
+              />
+            </div>
+            <p className="mt-2 text-center text-sm text-[#A3C2B2]/70">
+              What a $50 bag of groceries looks like
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={increment}
-            disabled={quantity >= MAX_BAGS}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Add one bag"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+
+          <div>
+            <h2 className="mb-4 text-lg font-semibold text-white">
+              How many bags of groceries?
+            </h2>
+            <ProgressDial quantity={quantity} />
+            <div className="mt-6 flex items-center justify-center gap-6">
+              <button
+                type="button"
+                onClick={decrement}
+                disabled={quantity <= 1}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Remove one bag"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <div className="min-w-[120px] text-center">
+                <p className="text-sm text-[#A3C2B2]">{quantity} × $50 =</p>
+                <p className="text-2xl font-bold text-white">${total}.00</p>
+              </div>
+              <button
+                type="button"
+                onClick={increment}
+                disabled={quantity >= MAX_BAGS}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Add one bag"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </>
+      ) : null}
 
       {/* Donor details */}
       <form action={handleSubmit} className="space-y-6">
-        <input type="hidden" name="priceId" value={priceFamilyBagId} />
-        <input type="hidden" name="quantity" value={quantity} />
+        <input type="hidden" name="priceId" value={selectedPriceId} />
+        <input type="hidden" name="quantity" value={isFullBag ? quantity : 1} />
 
         <h2 className="text-lg font-semibold text-white">Your details</h2>
 
@@ -221,12 +288,13 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
           {isPending ? (
             <><Loader2 className="h-4 w-4 animate-spin" />Redirecting to payment...</>
           ) : (
-            <><ShoppingBag className="h-4 w-4" />Give {quantity} {quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${total}.00)</>
+            <><ShoppingBag className="h-4 w-4" />{submitLabel}</>
           )}
         </Button>
 
         <p className="text-center text-xs text-[#A3C2B2]/60">
-          Payments processed securely via Stripe. Have a coupon code? Enter it on the payment page.
+          Payments processed securely via Stripe.
+          {isFullBag ? ' Have a coupon code? Enter it on the payment page.' : null}
         </p>
       </form>
 

@@ -1,11 +1,17 @@
 /** Boolean-only env checks for Stripe webhook → Supabase pipeline diagnostics. */
 
+import {
+  getSupabaseJwtRole,
+  isSupabaseServiceRoleKey,
+} from '@/lib/supabase/jwt-role'
+
 export type WebhookEnvStatus = {
   stripeSecretKey: boolean
   stripeWebhookSecret: boolean
   stripeWebhookSecretFormat: boolean
   supabaseUrl: boolean
   supabaseServiceRoleKey: boolean
+  supabaseServiceRoleKeyFormat: boolean
   resendApiKey: boolean
   resendFromEmail: boolean
   adminNotifyEmail: boolean
@@ -13,13 +19,15 @@ export type WebhookEnvStatus = {
 
 export function getWebhookEnvStatus(): WebhookEnvStatus {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? ''
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ?? ''
 
   return {
     stripeSecretKey: Boolean(process.env.STRIPE_SECRET_KEY?.startsWith('sk_')),
     stripeWebhookSecret: Boolean(webhookSecret),
     stripeWebhookSecretFormat: webhookSecret.startsWith('whsec_'),
     supabaseUrl: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith('https://')),
-    supabaseServiceRoleKey: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    supabaseServiceRoleKey: Boolean(serviceRoleKey),
+    supabaseServiceRoleKeyFormat: isSupabaseServiceRoleKey(serviceRoleKey),
     resendApiKey: Boolean(process.env.RESEND_API_KEY?.startsWith('re_')),
     resendFromEmail: Boolean(process.env.RESEND_FROM_EMAIL),
     adminNotifyEmail: Boolean(process.env.ADMIN_NOTIFY_EMAIL?.trim()),
@@ -43,6 +51,13 @@ export function getWebhookEnvErrors(): string[] {
   }
   if (!status.supabaseServiceRoleKey) {
     errors.push('SUPABASE_SERVICE_ROLE_KEY is missing')
+  } else if (!status.supabaseServiceRoleKeyFormat) {
+    const role = getSupabaseJwtRole(process.env.SUPABASE_SERVICE_ROLE_KEY)
+    errors.push(
+      role === 'anon'
+        ? 'SUPABASE_SERVICE_ROLE_KEY is the anon key — use the service_role key from Supabase → Settings → API'
+        : 'SUPABASE_SERVICE_ROLE_KEY is not a service_role JWT (check Supabase → Settings → API)',
+    )
   }
 
   return errors

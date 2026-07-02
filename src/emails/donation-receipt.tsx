@@ -17,11 +17,15 @@ interface Props {
 }
 
 export default function DonationReceiptEmail({ firstName, bags, amount }: Props) {
+  const isContribution = bags === 0
+
   return (
     <Html>
       <Head />
       <Preview>
-        {`Thank you for sponsoring ${bags} grocery bag${bags > 1 ? 's' : ''} — Bags of Groceries Tasmania`}
+        {isContribution
+          ? `Thank you for your $${amount.toFixed(0)} contribution — Bags of Groceries Tasmania`
+          : `Thank you for sponsoring ${bags} grocery bag${bags > 1 ? 's' : ''} — Bags of Groceries Tasmania`}
       </Preview>
       <Body style={body}>
         <Container style={container}>
@@ -34,12 +38,22 @@ export default function DonationReceiptEmail({ firstName, bags, amount }: Props)
               Thank you, {firstName}!
             </Heading>
             <Text style={text}>
-              Your generous donation has been received and processed. You have
-              sponsored{' '}
-              <strong>
-                {bags} grocery bag{bags > 1 ? 's' : ''}
-              </strong>{' '}
-              for a Tasmanian family in need.
+              {isContribution ? (
+                <>
+                  Your generous <strong>${amount.toFixed(2)} AUD</strong> contribution
+                  has been received. It helps us keep supporting Tasmanian families
+                  through Bags of Groceries.
+                </>
+              ) : (
+                <>
+                  Your generous donation has been received and processed. You have
+                  sponsored{' '}
+                  <strong>
+                    {bags} grocery bag{bags > 1 ? 's' : ''}
+                  </strong>{' '}
+                  for a Tasmanian family in need.
+                </>
+              )}
             </Text>
 
             <Section style={summaryBox}>
@@ -47,15 +61,19 @@ export default function DonationReceiptEmail({ firstName, bags, amount }: Props)
               <Text style={summaryLine}>
                 Amount paid: <strong>${amount.toFixed(2)} AUD</strong>
               </Text>
-              <Text style={summaryLine}>
-                Bags sponsored: <strong>{bags}</strong>
-              </Text>
+              {!isContribution ? (
+                <Text style={summaryLine}>
+                  Bags sponsored: <strong>{bags}</strong>
+                </Text>
+              ) : null}
             </Section>
 
             <Text style={text}>
               Your support makes a real, tangible difference to Tasmanian
-              families experiencing hardship. Groceries will be prepared and
-              delivered by our supermarket partner.
+              families experiencing hardship.
+              {!isContribution
+                ? ' Groceries will be prepared and delivered by our supermarket partner.'
+                : null}
             </Text>
 
             <Hr style={divider} />

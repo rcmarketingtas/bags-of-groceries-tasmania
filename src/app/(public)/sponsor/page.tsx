@@ -4,17 +4,18 @@ import { DonorLeaderboard } from '@/components/home/donor-leaderboard'
 import { DonationForm } from '@/components/sponsor/donation-form'
 import { FB_PAGE_URL } from '@/lib/facebook'
 import { getTotalBagsDelivered } from '@/lib/donations'
-import { getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
+import { getContribute25PriceId, getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
 
 export const metadata: Metadata = {
   title: 'Give a Bag of Groceries',
-  description: 'Give a bag of groceries for a Tasmanian family doing it tough. $50 per bag.',
+  description: 'Give from $25 or sponsor a full $50 bag of groceries for a Tasmanian family doing it tough.',
 }
 
 export const dynamic = 'force-dynamic'
 
 export default async function SponsorPage() {
   const priceFamilyBagId = getFamilyBagPriceId() ?? ''
+  const priceContribute25Id = getContribute25PriceId()
   const stripeConfigErrors = getStripeConfigErrors()
   const totalBags = await getTotalBagsDelivered()
 
@@ -71,7 +72,10 @@ export default async function SponsorPage() {
           )}
 
           <div className="card-dark p-6 sm:p-8">
-            <DonationForm priceFamilyBagId={priceFamilyBagId} />
+            <DonationForm
+              priceFamilyBagId={priceFamilyBagId}
+              priceContribute25Id={priceContribute25Id}
+            />
           </div>
 
           {/* Trust signals */}

@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import {
   getStripe,
   getStripeConfigErrors,
-  getStripeProducts,
+  getDonationTier,
   stripeErrorMessage,
 } from '@/lib/stripe'
 import { rateLimit } from '@/lib/rate-limit'
@@ -47,36 +47,39 @@ export async function createCheckoutSession(
   }
 
   const { firstName, lastName, email, message, priceId } = result.data
+  const tier = getDonationTier(priceId)
 
-  const validPriceIds = Object.values(getStripeProducts())
-    .map((p) => p.priceId)
-    .filter(Boolean)
-
-  if (!validPriceIds.includes(priceId)) {
+  if (!tier) {
     return {
       error:
-        'Invalid product selected. Check STRIPE_PRICE_FAMILY_BAG is set correctly in your environment.',
+        'Invalid product selected. Check Stripe price IDs are set correctly in your environment.',
     }
   }
 
   const quantityRaw = parseInt((formData.get('quantity') as string) ?? '1', 10)
   const quantity =
-    isNaN(quantityRaw) || quantityRaw < 1 ? 1 : Math.min(quantityRaw, MAX_BAGS)
+    tier.donationType === 'full_bag'
+      ? isNaN(quantityRaw) || quantityRaw < 1
+        ? 1
+        : Math.min(quantityRaw, MAX_BAGS)
+      : 1
 
+  const bags = tier.bags * quantity
   const siteUrl = getSiteUrl()
 
   try {
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
       line_items: [{ price: priceId, quantity }],
-      allow_promotion_codes: true,
+      allow_promotion_codes: tier.donationType === 'full_bag',
       customer_email: email,
       metadata: {
         first_name: firstName,
         last_name: lastName,
         email,
         message: message ?? '',
-        bags: quantity.toString(),
+        bags: bags.toString(),
+        donation_type: tier.donationType,
       },
       success_url: `${siteUrl}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/sponsor`,

@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000'],
+      allowedOrigins: [
+        'localhost:3000',
+        'bagsofgroceries.org',
+        'www.bagsofgroceries.org',
+        'bags-of-groceries-tasmania.vercel.app',
+      ],
     },
   },
 }

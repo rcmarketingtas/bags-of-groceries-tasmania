@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Heart, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { getLeaderboardDonations, type LeaderboardSort } from '@/lib/donations'
+import { getLeaderboardDonations, formatContributionLabel, type LeaderboardSort } from '@/lib/donations'
 import { formatRelativeTime } from '@/lib/utils'
 
 type DonorLeaderboardProps = {
@@ -120,14 +120,25 @@ export async function DonorLeaderboard({
                     </p>
                     <p className="text-xs text-[#1c4d31]/70">
                       {isTop
-                        ? `${donor.bags} ${donor.bags === 1 ? 'bag' : 'bags'} donated`
+                        ? donor.bags > 0
+                          ? `${donor.bags} ${donor.bags === 1 ? 'bag' : 'bags'} donated`
+                          : formatContributionLabel(donor.amountCents)
                         : formatRelativeTime(donor.lastDonationAt)}
                     </p>
                   </div>
 
                   <div className="flex shrink-0 items-center gap-1 rounded-full bg-[#1c4d31]/10 px-2.5 py-1 text-xs font-semibold text-[#1c4d31]">
-                    <ShoppingBag className="h-3 w-3" />
-                    {donor.bags} {donor.bags === 1 ? 'bag' : 'bags'}
+                    {donor.bags > 0 ? (
+                      <>
+                        <ShoppingBag className="h-3 w-3" />
+                        {donor.bags} {donor.bags === 1 ? 'bag' : 'bags'}
+                      </>
+                    ) : (
+                      <>
+                        <Heart className="h-3 w-3" />
+                        {formatContributionLabel(donor.amountCents)}
+                      </>
+                    )}
                   </div>
                 </li>
               ))}

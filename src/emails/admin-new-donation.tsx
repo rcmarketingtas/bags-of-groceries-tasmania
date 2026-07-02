@@ -27,11 +27,15 @@ export default function AdminNewDonationEmail({
   amount,
   message,
 }: Props) {
+  const isContribution = bags === 0
+
   return (
     <Html>
       <Head />
       <Preview>
-        New donation: {bags} bag{bags !== 1 ? 's' : ''} from {firstName} {lastName}
+        {isContribution
+          ? `New $${amount.toFixed(0)} contribution from ${firstName} ${lastName}`
+          : `New donation: ${bags} bag${bags !== 1 ? 's' : ''} from ${firstName} ${lastName}`}
       </Preview>
       <Body style={body}>
         <Container style={container}>
@@ -40,14 +44,18 @@ export default function AdminNewDonationEmail({
           </Section>
           <Section style={content}>
             <Text style={text}>
-              Someone just gave {bags} bag{bags !== 1 ? 's' : ''} of groceries. Payment confirmed via Stripe.
+              {isContribution
+                ? `Someone just contributed $${amount.toFixed(2)} AUD. Payment confirmed via Stripe.`
+                : `Someone just gave ${bags} bag${bags !== 1 ? 's' : ''} of groceries. Payment confirmed via Stripe.`}
             </Text>
 
             <Section style={detailBox}>
               <Text style={detailLine}><strong>Donor:</strong> {firstName} {lastName}</Text>
               <Text style={detailLine}><strong>Email:</strong> {email}</Text>
               <Text style={detailLine}><strong>Amount:</strong> ${amount.toFixed(2)} AUD</Text>
-              <Text style={detailLine}><strong>Bags:</strong> {bags}</Text>
+              {!isContribution ? (
+                <Text style={detailLine}><strong>Bags:</strong> {bags}</Text>
+              ) : null}
               {message ? (
                 <>
                   <Text style={detailLine}><strong>Message to family:</strong></Text>
