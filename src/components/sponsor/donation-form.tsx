@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Image from 'next/image'
 import { ShoppingBag, Minus, Plus, Loader2, AlertCircle, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -110,6 +111,21 @@ export function DonationForm({ priceFamilyBagId }: DonationFormProps) {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div>
+        <div className="overflow-hidden rounded-xl border border-[#163d27]">
+          <Image
+            src="/grocery-bag.jpg"
+            alt="A $50 bag of groceries including fresh fruit, vegetables, chicken, mince, eggs, milk, pasta, bread, and pantry staples"
+            width={800}
+            height={600}
+            className="aspect-[4/3] w-full object-cover"
+          />
+        </div>
+        <p className="mt-2 text-center text-sm text-[#A3C2B2]/70">
+          What a $50 bag of groceries looks like
+        </p>
       </div>
 
       {/* Progress dial */}
