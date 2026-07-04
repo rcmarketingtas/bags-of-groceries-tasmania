@@ -152,9 +152,16 @@ Set all environment variables in the Vercel dashboard under **Settings → Envir
 
 ## Admin Access
 
-1. Create an admin user in **Supabase Dashboard → Authentication → Users**
-2. Navigate to `/admin/login`
-3. Sign in with the credentials you created
+1. Create an admin user in **Supabase Dashboard → Authentication → Users** (enable **Auto Confirm User**), **or** run locally:
+
+```bash
+# With NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local
+npm run create-admin-user -- bagsofgroceries@gmail.com 'YourSecurePassword'
+```
+
+2. Confirm Vercel `NEXT_PUBLIC_SUPABASE_URL` matches that same Supabase project (check `/api/health/admin` after deploy).
+
+3. Navigate to `/admin/login` and sign in.
 
 The admin area is protected by Supabase Auth middleware. Only authenticated users can access `/admin/*` routes.
 

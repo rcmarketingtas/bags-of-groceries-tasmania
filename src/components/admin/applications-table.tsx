@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Download } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 import { updateApplicationStatus } from '@/actions/admin'
 import type { Application, ApplicationStatus } from '@/types'
@@ -29,14 +30,36 @@ interface ApplicationsTableProps {
 export function ApplicationsTable({ applications }: ApplicationsTableProps) {
   if (applications.length === 0) {
     return (
-      <div className="rounded-lg border bg-muted/20 py-16 text-center text-muted-foreground">
-        No applications found.
+      <div className="space-y-4">
+        <div className="flex items-center justify-end">
+          <Button asChild variant="outline" size="sm">
+            <a href="/api/admin/export/applications" download>
+              <Download className="h-4 w-4" />
+              Export CSV
+            </a>
+          </Button>
+        </div>
+        <div className="rounded-lg border bg-muted/20 py-16 text-center text-muted-foreground">
+          No applications found.
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="rounded-xl border bg-white">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">
+          {applications.length} application{applications.length !== 1 ? 's' : ''}
+        </p>
+        <Button asChild variant="outline" size="sm">
+          <a href="/api/admin/export/applications" download>
+            <Download className="h-4 w-4" />
+            Export CSV
+          </a>
+        </Button>
+      </div>
+      <div className="rounded-xl border bg-white">
       <Table>
         <TableHeader>
           <TableRow>
@@ -131,6 +154,7 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
           })}
         </TableBody>
       </Table>
+      </div>
     </div>
   )
 }
