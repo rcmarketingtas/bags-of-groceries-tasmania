@@ -21,7 +21,6 @@ interface Props {
   adults: number
   children: number
   circumstances: string
-  mediaConsent: boolean
 }
 
 export default function AdminNewApplicationEmail({
@@ -35,7 +34,6 @@ export default function AdminNewApplicationEmail({
   adults,
   children,
   circumstances,
-  mediaConsent,
 }: Props) {
   return (
     <Html>
@@ -61,9 +59,6 @@ export default function AdminNewApplicationEmail({
               </Text>
               <Text style={detailLine}>
                 <strong>Household:</strong> {adults} adult{adults !== 1 ? 's' : ''}, {children} child{children !== 1 ? 'ren' : ''}
-              </Text>
-              <Text style={detailLine}>
-                <strong>Media consent:</strong> {mediaConsent ? 'Yes' : 'No'}
               </Text>
               <Text style={detailLine}><strong>Circumstances:</strong></Text>
               <Text style={circumstancesText}>{circumstances}</Text>

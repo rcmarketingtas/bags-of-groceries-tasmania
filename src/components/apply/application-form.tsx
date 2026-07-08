@@ -128,24 +128,6 @@ export function ApplicationForm() {
         </div>
       </div>
 
-      {/* Media consent */}
-      <div className="rounded-xl border border-[#D5E0DA] bg-[#F4F7F5] p-4">
-        <h2 className="mb-3 text-sm font-semibold text-black">
-          Media Consent (Optional)
-        </h2>
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox" name="mediaConsent" value="on"
-            className="mt-1 h-4 w-4 rounded border-[#D5E0DA] text-[#1c4d31] accent-[#1c4d31]"
-          />
-          <span className="text-sm text-[#1c4d31]/80">
-            I give permission for Bags of Groceries Tasmania to use photos,
-            videos, and/or my story on social media, our website, and promotional
-            materials.
-          </span>
-        </label>
-      </div>
-
       {/* Confirmation */}
       <div className="rounded-xl border border-[#D5E0DA] bg-[#F4F7F5] p-4">
         <label className="flex cursor-pointer items-start gap-3">

@@ -24,7 +24,6 @@ export interface Application {
   adults: number
   children: number
   circumstances: string
-  media_consent: boolean
   status: ApplicationStatus
   created_at: string
 }
