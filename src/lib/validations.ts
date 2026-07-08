@@ -47,6 +47,10 @@ export const applicationSchema = z.object({
     .min(20, 'Please provide at least 20 characters describing your circumstances')
     .max(1000, 'Please keep your description under 1000 characters')
     .trim(),
+  mediaConsent: z
+    .enum(['on'])
+    .optional()
+    .transform((v) => v === 'on'),
   confirmed: z.literal('on', {
     errorMap: () => ({ message: 'You must confirm the information is accurate' }),
   }),

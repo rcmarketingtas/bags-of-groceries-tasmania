@@ -83,6 +83,9 @@ export function ApplicationsTable({ applications }: ApplicationsTableProps) {
                   <div className="text-xs text-muted-foreground">
                     {app.email}
                   </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Media consent: {app.media_consent ? 'Yes' : 'No'}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div>{app.address}</div>

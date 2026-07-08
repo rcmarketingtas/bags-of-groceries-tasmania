@@ -61,6 +61,7 @@ export async function submitApplication(
       adults: result.data.adults,
       children: result.data.children,
       circumstances: result.data.circumstances,
+      mediaConsent: result.data.mediaConsent ?? false,
     }
 
     const supabase = createAdminClient()
@@ -76,6 +77,7 @@ export async function submitApplication(
       adults: data.adults,
       children: data.children,
       circumstances: data.circumstances,
+      media_consent: data.mediaConsent,
       status: 'pending',
     })
 

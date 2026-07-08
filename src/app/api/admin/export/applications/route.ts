@@ -34,6 +34,7 @@ export async function GET() {
     'Adults',
     'Children',
     'Status',
+    'Media Consent',
     'Circumstances',
     'Date Applied',
   ]
@@ -49,6 +50,7 @@ export async function GET() {
     a.adults,
     a.children,
     a.status,
+    a.media_consent ? 'Yes' : 'No',
     a.circumstances,
     formatDate(a.created_at),
   ])
