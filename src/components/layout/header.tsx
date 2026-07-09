@@ -6,11 +6,16 @@ import { Menu, X, ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { HeroCTAs } from '@/components/home/hero-ctas'
 
-const navLinks = [
+const baseNavLinks = [
   { href: '/', label: 'Home' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
+
+const shopNavLink = { href: '/shop/caramel-slices', label: 'Caramel Slices' }
+
+const shopEnabled = process.env.NEXT_PUBLIC_SHOP_ENABLED === 'true'
+const navLinks = shopEnabled ? [...baseNavLinks, shopNavLink] : baseNavLinks
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
