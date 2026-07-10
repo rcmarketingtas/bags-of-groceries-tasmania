@@ -101,7 +101,8 @@ export function CaramelSliceBuy({
       </Button>
 
       <p className="text-center text-xs text-[#1c4d31]/60">
-        Secure checkout powered by Shopify. Local delivery in Launceston and nearby suburbs.
+        Secure checkout powered by Shopify. Local delivery in Launceston and
+        nearby suburbs, within 7 days of ordering.
       </p>
     </div>
   )
