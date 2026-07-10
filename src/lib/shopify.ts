@@ -7,7 +7,7 @@ import {
   isShopifyConfigured,
 } from '@/lib/shop-config'
 
-const STOREFRONT_API_VERSION = '2025-01'
+const STOREFRONT_API_VERSION = '2024-10'
 
 export type ShopifyProduct = {
   title: string
@@ -19,6 +19,10 @@ export type ShopifyProduct = {
   currencyCode: string
   availableForSale: boolean
 }
+
+export type ShopifyProductResult =
+  | { ok: true; product: ShopifyProduct }
+  | { ok: false; error: string }
 
 type StorefrontResponse<T> = {
   data?: T
@@ -41,15 +45,24 @@ async function storefrontFetch<T>(
         'X-Shopify-Storefront-Access-Token': token,
       },
       body: JSON.stringify({ query, variables }),
-      next: { revalidate: 60 },
+      cache: 'no-store',
     },
   )
 
+  const body = await response.text()
+
   if (!response.ok) {
-    throw new Error(`Shopify API error: ${response.status} ${response.statusText}`)
+    throw new Error(
+      `Shopify HTTP ${response.status}: ${body.slice(0, 200) || response.statusText}`,
+    )
   }
 
-  const json = (await response.json()) as StorefrontResponse<T>
+  let json: StorefrontResponse<T>
+  try {
+    json = JSON.parse(body) as StorefrontResponse<T>
+  } catch {
+    throw new Error('Shopify returned invalid JSON')
+  }
 
   if (json.errors?.length) {
     throw new Error(json.errors.map((e) => e.message).join('; '))
@@ -72,13 +85,15 @@ const PRODUCT_BY_HANDLE_QUERY = `
         altText
       }
       variants(first: 1) {
-        nodes {
-          id
-          title
-          availableForSale
-          price {
-            amount
-            currencyCode
+        edges {
+          node {
+            id
+            title
+            availableForSale
+            price {
+              amount
+              currencyCode
+            }
           }
         }
       }
@@ -92,46 +107,66 @@ type ProductByHandleData = {
     description: string
     featuredImage: { url: string; altText: string | null } | null
     variants: {
-      nodes: Array<{
-        id: string
-        title: string
-        availableForSale: boolean
-        price: { amount: string; currencyCode: string }
+      edges: Array<{
+        node: {
+          id: string
+          title: string
+          availableForSale: boolean
+          price: { amount: string; currencyCode: string }
+        } | null
       }>
     }
   } | null
 }
 
-export async function getCaramelSliceProduct(): Promise<ShopifyProduct | null> {
+export async function fetchCaramelSliceProduct(): Promise<ShopifyProductResult> {
   if (!isShopifyConfigured()) {
-    return null
+    return { ok: false, error: getShopifyConfigErrors().join(', ') }
   }
 
-  const handle = getShopProductHandle()
-  const data = await storefrontFetch<ProductByHandleData>(PRODUCT_BY_HANDLE_QUERY, {
-    handle,
-  })
+  try {
+    const handle = getShopProductHandle()
+    const data = await storefrontFetch<ProductByHandleData>(PRODUCT_BY_HANDLE_QUERY, {
+      handle,
+    })
 
-  const product = data.product
-  if (!product) {
-    return null
-  }
+    const product = data.product
+    if (!product) {
+      return {
+        ok: false,
+        error: `No product found for handle "${handle}". Publish it to your Headless sales channel in Shopify.`,
+      }
+    }
 
-  const variant = product.variants.nodes[0]
-  if (!variant) {
-    return null
-  }
+    const variant = product.variants.edges[0]?.node
+    if (!variant) {
+      return { ok: false, error: 'Product has no variants.' }
+    }
 
-  return {
-    title: product.title,
-    description: product.description,
-    featuredImage: product.featuredImage,
-    variantId: variant.id,
-    variantTitle: variant.title,
-    priceAmount: variant.price.amount,
-    currencyCode: variant.price.currencyCode,
-    availableForSale: variant.availableForSale,
+    return {
+      ok: true,
+      product: {
+        title: product.title,
+        description: product.description,
+        featuredImage: product.featuredImage,
+        variantId: variant.id,
+        variantTitle: variant.title,
+        priceAmount: variant.price.amount,
+        currencyCode: variant.price.currencyCode,
+        availableForSale: variant.availableForSale,
+      },
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown Shopify error'
+    console.error('[shopify] product fetch failed:', message)
+    return { ok: false, error: message }
   }
+}
+
+/** @deprecated use fetchCaramelSliceProduct */
+export async function getCaramelSliceProduct(): Promise<ShopifyProduct | null> {
+  const result = await fetchCaramelSliceProduct()
+  return result.ok ? result.product : null
 }
 
 const CART_CREATE_MUTATION = `
@@ -194,4 +229,12 @@ export function formatShopifyPrice(amount: string, currencyCode: string): string
     }).format(value)
   }
   return `${currencyCode} ${value.toFixed(2)}`
+}
+
+export function getShopifyImageHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return null
+  }
 }

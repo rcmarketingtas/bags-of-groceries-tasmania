@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import { Cake, Heart, Truck } from 'lucide-react'
 import { CaramelSliceBuy } from '@/components/shop/caramel-slice-buy'
 import {
@@ -10,7 +9,7 @@ import {
 } from '@/lib/shop-config'
 import {
   formatShopifyPrice,
-  getCaramelSliceProduct,
+  fetchCaramelSliceProduct,
 } from '@/lib/shopify'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +27,12 @@ export const dynamic = 'force-dynamic'
 
 export default async function CaramelSlicesPage() {
   const configErrors = getShopifyConfigErrors()
-  const product = isShopifyConfigured() ? await getCaramelSliceProduct() : null
+  const productResult = isShopifyConfigured()
+    ? await fetchCaramelSliceProduct()
+    : null
+  const product = productResult?.ok ? productResult.product : null
+  const productError =
+    productResult && !productResult.ok ? productResult.error : null
 
   return (
     <div className="min-h-screen">
@@ -71,7 +75,19 @@ export default async function CaramelSlicesPage() {
             </div>
           )}
 
-          {!product && configErrors.length === 0 && (
+          {productError && (
+            <div className="mb-8 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+              <p className="font-medium">Could not load product from Shopify</p>
+              <p className="mt-1 text-xs">{productError}</p>
+              <p className="mt-2 text-xs">
+                Common fixes: publish the product to your <strong>Headless</strong> channel,
+                confirm <code>SHOPIFY_PRODUCT_HANDLE</code>, and check{' '}
+                <code>/api/health/shop</code>.
+              </p>
+            </div>
+          )}
+
+          {!product && !productError && configErrors.length === 0 && (
             <div className="card-light py-16 text-center text-[#1c4d31]/80">
               Product not found. Check <code>SHOPIFY_PRODUCT_HANDLE</code> matches
               your Shopify product slug.
@@ -82,13 +98,11 @@ export default async function CaramelSlicesPage() {
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-14">
               <div className="relative aspect-square overflow-hidden rounded-2xl border border-[#D5E0DA] bg-[#F4F7F5]">
                 {product.featuredImage ? (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={product.featuredImage.url}
                     alt={product.featuredImage.altText ?? product.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority
+                    className="h-full w-full object-cover"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
