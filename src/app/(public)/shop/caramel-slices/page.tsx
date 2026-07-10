@@ -133,10 +133,10 @@ export default async function CaramelSlicesPage() {
                 </div>
 
                 <div className="mb-6 rounded-xl border border-[#D5E0DA] bg-[#F4F7F5] p-4 text-xs text-[#1c4d31]/70">
-                  <p className="font-medium text-[#1c4d31]">Allergen information</p>
+                  <p className="font-medium text-[#1c4d31]">Allergen Information</p>
                   <p className="mt-1">
-                    Contains gluten and dairy. Made in a home kitchen. Please contact
-                    us if you have allergy concerns before ordering.
+                    Contains or may contain: wheat (gluten), milk, eggs, soy, peanuts,
+                    and tree nuts.
                   </p>
                 </div>
 
