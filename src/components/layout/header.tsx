@@ -12,10 +12,9 @@ const baseNavLinks = [
   { href: '/contact', label: 'Contact' },
 ]
 
-const shopNavLink = { href: '/shop/caramel-slices', label: 'Caramel Slices' }
+const shopNavLink = { href: '/shop/caramel-slices', label: 'Order Caramel Slice' }
 
-const shopEnabled = process.env.NEXT_PUBLIC_SHOP_ENABLED === 'true'
-const navLinks = shopEnabled ? [...baseNavLinks, shopNavLink] : baseNavLinks
+const navLinks = [...baseNavLinks, shopNavLink]
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)

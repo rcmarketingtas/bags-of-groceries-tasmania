@@ -1,6 +1,6 @@
-/** When false, shop nav links are hidden and the shop page is noindex. */
+/** Shop is live unless explicitly disabled with NEXT_PUBLIC_SHOP_ENABLED=false */
 export function isShopEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_SHOP_ENABLED === 'true'
+  return process.env.NEXT_PUBLIC_SHOP_ENABLED !== 'false'
 }
 
 function normalizeEnvValue(raw: string | undefined): string {

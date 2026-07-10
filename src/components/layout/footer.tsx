@@ -1,10 +1,8 @@
 import Link from 'next/link'
 import { ShoppingBag, Facebook } from 'lucide-react'
 import { FB_PAGE_URL } from '@/lib/facebook'
-import { isShopEnabled } from '@/lib/shop-config'
 
 export function Footer() {
-  const shopEnabled = isShopEnabled()
   return (
     <footer className="border-t border-[#163d27] bg-[#1c4d31]">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -39,9 +37,7 @@ export function Footer() {
             <Link href="/apply" className="transition-colors hover:text-white">Apply for Assistance</Link>
             <Link href="/about" className="transition-colors hover:text-white">About</Link>
             <Link href="/contact" className="transition-colors hover:text-white">Contact</Link>
-            {shopEnabled && (
-              <Link href="/shop/caramel-slices" className="transition-colors hover:text-white">Caramel Slices</Link>
-            )}
+            <Link href="/shop/caramel-slices" className="transition-colors hover:text-white">Order Caramel Slice</Link>
           </nav>
         </div>
 

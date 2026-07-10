@@ -3,7 +3,6 @@ import { Cake, Heart, Truck } from 'lucide-react'
 import { CaramelSliceBuy } from '@/components/shop/caramel-slice-buy'
 import {
   getShopifyConfigErrors,
-  isShopEnabled,
   isShopifyConfigured,
   SHOPIFY_ENV_NAMES,
 } from '@/lib/shop-config'
@@ -14,12 +13,9 @@ import {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Caramel Slices',
+    title: 'Order Caramel Slice',
     description:
-      'Buy homemade caramel slices — 100% of profits support Bags of Groceries Tasmania.',
-    ...(isShopEnabled()
-      ? {}
-      : { robots: { index: false, follow: false } }),
+      'Order homemade caramel slices — 100% of profits support Bags of Groceries Tasmania.',
   }
 }
 
@@ -42,7 +38,7 @@ export default async function CaramelSlicesPage() {
             <Cake className="h-6 w-6 text-white" />
           </div>
           <h1 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Caramel Slices for a Cause
+            Order a Caramel Slice
           </h1>
           <p className="text-lg text-[#A3C2B2]">
             100% of profits support Bags of Groceries Tasmania — putting food on
