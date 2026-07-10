@@ -6,6 +6,7 @@ import {
   getShopifyConfigErrors,
   isShopEnabled,
   isShopifyConfigured,
+  SHOPIFY_ENV_NAMES,
 } from '@/lib/shop-config'
 import {
   formatShopifyPrice,
@@ -52,14 +53,21 @@ export default async function CaramelSlicesPage() {
             <div className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               <p className="font-medium">Shop preview — configuration needed</p>
               <p className="mt-1 text-amber-800">
-                Add Shopify variables to <code className="text-xs">.env.local</code> to
-                load the product and test checkout locally.
+                Add these in <strong>Vercel → Settings → Environment Variables</strong>{' '}
+                (enable <strong>Preview</strong> and <strong>Production</strong>), then{' '}
+                <strong>Redeploy</strong>. For local dev, use <code className="text-xs">.env.local</code>.
               </p>
               <ul className="mt-2 list-inside list-disc text-xs text-amber-800">
-                {configErrors.map((err) => (
-                  <li key={err}>{err}</li>
+                {SHOPIFY_ENV_NAMES.map((name) => (
+                  <li key={name}>
+                    <code>{name}</code>
+                    {configErrors.some((e) => e.startsWith(name)) ? ' — missing' : ' — ok'}
+                  </li>
                 ))}
               </ul>
+              <p className="mt-2 text-xs text-amber-800">
+                Check status: <code>/api/health/shop</code>
+              </p>
             </div>
           )}
 
