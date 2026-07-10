@@ -128,7 +128,7 @@ export default async function CaramelSlicesPage() {
                   </div>
                   <div className="flex items-start gap-3 text-sm text-[#1c4d31]/80">
                     <Truck className="mt-0.5 h-4 w-4 shrink-0 text-[#1c4d31]" />
-                    <span>Local delivery in Launceston and nearby suburbs. Shipping calculated at checkout.</span>
+                    <span>Local delivery in Launceston and nearby suburbs.</span>
                   </div>
                 </div>
 
