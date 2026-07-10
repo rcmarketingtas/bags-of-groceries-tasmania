@@ -80,9 +80,9 @@ export default async function CaramelSlicesPage() {
               <p className="font-medium">Could not load product from Shopify</p>
               <p className="mt-1 text-xs">{productError}</p>
               <p className="mt-2 text-xs">
-                Common fixes: publish the product to your <strong>Headless</strong> channel,
-                confirm <code>SHOPIFY_PRODUCT_HANDLE</code>, and check{' '}
-                <code>/api/health/shop</code>.
+                <strong>401 UNAUTHORIZED?</strong> Use the <strong>Storefront API</strong> token from
+                Shopify → Headless — not the Admin API token. Domain must be{' '}
+                <code>your-store.myshopify.com</code>.
               </p>
             </div>
           )}

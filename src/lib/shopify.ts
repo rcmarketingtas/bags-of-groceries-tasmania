@@ -157,7 +157,11 @@ export async function fetchCaramelSliceProduct(): Promise<ShopifyProductResult> 
       },
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown Shopify error'
+    let message = err instanceof Error ? err.message : 'Unknown Shopify error'
+    if (message.includes('401') || message.includes('UNAUTHORIZED')) {
+      message +=
+        ' — Regenerate the Storefront API access token in Shopify Headless (not the Admin API token). Ensure SHOPIFY_STORE_DOMAIN matches that same store.'
+    }
     console.error('[shopify] product fetch failed:', message)
     return { ok: false, error: message }
   }

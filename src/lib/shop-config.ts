@@ -3,27 +3,28 @@ export function isShopEnabled(): boolean {
   return process.env.NEXT_PUBLIC_SHOP_ENABLED === 'true'
 }
 
+function normalizeEnvValue(raw: string | undefined): string {
+  return (raw ?? '').trim().replace(/^['"]|['"]$/g, '')
+}
+
 export function getShopProductHandle(): string {
   return (
-    process.env.SHOPIFY_PRODUCT_HANDLE?.trim() ??
-    process.env.NEXT_PUBLIC_SHOPIFY_PRODUCT_HANDLE?.trim() ??
-    ''
+    normalizeEnvValue(process.env.SHOPIFY_PRODUCT_HANDLE) ||
+    normalizeEnvValue(process.env.NEXT_PUBLIC_SHOPIFY_PRODUCT_HANDLE)
   )
 }
 
 export function getShopifyStoreDomain(): string {
   const raw =
-    process.env.SHOPIFY_STORE_DOMAIN?.trim() ??
-    process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN?.trim() ??
-    ''
+    normalizeEnvValue(process.env.SHOPIFY_STORE_DOMAIN) ||
+    normalizeEnvValue(process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN)
   return raw.replace(/^https?:\/\//, '').replace(/\/$/, '')
 }
 
 export function getShopifyStorefrontToken(): string {
   return (
-    process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim() ??
-    process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN?.trim() ??
-    ''
+    normalizeEnvValue(process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN) ||
+    normalizeEnvValue(process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN)
   )
 }
 
