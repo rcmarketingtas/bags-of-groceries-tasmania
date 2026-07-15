@@ -141,10 +141,7 @@ export function DonationForm(props: DonationFormProps) {
   const submitLabel = (() => {
     if (isMonthly) {
       if (isFullBag) {
-        if (quantity === 1) {
-          return `Give $${BAG_PRICE}/month`
-        }
-        return `Give ${quantity} bags/month ($${total}/month)`
+        return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries ($${total}/month)`
       }
       return `Give $${CONTRIBUTE_PRICE}/month`
     }
@@ -189,7 +186,7 @@ export function DonationForm(props: DonationFormProps) {
               <span className="font-semibold text-white">Give monthly</span>
             </div>
             <p className="text-sm text-[#A3C2B2]">
-              Ongoing support — cancel anytime via Stripe.
+              Ongoing support for Tasmanian families.
             </p>
           </button>
 
@@ -285,38 +282,40 @@ export function DonationForm(props: DonationFormProps) {
             </p>
           </div>
 
-          {!isMonthly ? (
-            <div>
-              <h2 className="mb-4 text-lg font-semibold text-white">
-                How many bags of groceries?
-              </h2>
-              <ProgressDial quantity={quantity} />
-              <div className="mt-6 flex items-center justify-center gap-6">
-                <button
-                  type="button"
-                  onClick={decrement}
-                  disabled={quantity <= 1}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Remove one bag"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <div className="min-w-[120px] text-center">
-                  <p className="text-sm text-[#A3C2B2]">{quantity} × $50 =</p>
-                  <p className="text-2xl font-bold text-white">${total}.00</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={increment}
-                  disabled={quantity >= MAX_BAGS}
-                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Add one bag"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
+          <div>
+            <h2 className="mb-4 text-lg font-semibold text-white">
+              {isMonthly ? 'How many bags per month?' : 'How many bags of groceries?'}
+            </h2>
+            <ProgressDial quantity={quantity} />
+            <div className="mt-6 flex items-center justify-center gap-6">
+              <button
+                type="button"
+                onClick={decrement}
+                disabled={quantity <= 1}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Remove one bag"
+              >
+                <Minus className="h-4 w-4" />
+              </button>
+              <div className="min-w-[120px] text-center">
+                <p className="text-sm text-[#A3C2B2]">
+                  {quantity} × $50{isMonthly ? '/month' : ''} =
+                </p>
+                <p className="text-2xl font-bold text-white">
+                  ${total}{isMonthly ? '/month' : '.00'}
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={increment}
+                disabled={quantity >= MAX_BAGS}
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
+                aria-label="Add one bag"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
             </div>
-          ) : null}
+          </div>
         </>
       ) : null}
 
