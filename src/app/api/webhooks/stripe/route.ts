@@ -64,7 +64,119 @@ function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
   if (invoice.subscription?.id) {
     return invoice.subscription.id
   }
+
+  for (const line of invoice.lines?.data ?? []) {
+    if (typeof line.subscription === 'string') {
+      return line.subscription
+    }
+    if (line.subscription?.id) {
+      return line.subscription.id
+    }
+  }
+
   return null
+}
+
+function getInvoiceCustomerId(invoice: Stripe.Invoice): string | null {
+  if (typeof invoice.customer === 'string') {
+    return invoice.customer
+  }
+  if (invoice.customer?.id) {
+    return invoice.customer.id
+  }
+  return null
+}
+
+function checkoutSessionDonorHints(session: Stripe.Checkout.Session): {
+  meta: Stripe.Metadata
+  email: string
+  name: { firstName: string; lastName: string }
+} {
+  return {
+    meta: session.metadata ?? {},
+    email:
+      session.customer_email?.trim() ||
+      session.customer_details?.email?.trim() ||
+      '',
+    name: splitCustomerName(session.customer_details?.name),
+  }
+}
+
+async function findCheckoutSessionForInvoice(
+  invoice: Stripe.Invoice,
+  subscriptionId: string | null,
+  hintedSession?: Stripe.Checkout.Session,
+): Promise<Stripe.Checkout.Session | null> {
+  if (hintedSession) {
+    return hintedSession
+  }
+
+  if (subscriptionId) {
+    try {
+      const sessions = await getStripe().checkout.sessions.list({
+        subscription: subscriptionId,
+        limit: 1,
+      })
+      if (sessions.data[0]) {
+        return sessions.data[0]
+      }
+    } catch (err) {
+      logStep('checkout.sessions.list by subscription failed', {
+        invoiceId: invoice.id,
+        subscriptionId,
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+
+  const customerId = getInvoiceCustomerId(invoice)
+  if (!customerId) {
+    return null
+  }
+
+  try {
+    const sessions = await getStripe().checkout.sessions.list({
+      customer: customerId,
+      limit: 20,
+    })
+    return (
+      sessions.data.find(
+        (session) =>
+          session.mode === 'subscription' && session.status === 'complete',
+      ) ??
+      sessions.data.find((session) => session.status === 'complete') ??
+      sessions.data[0] ??
+      null
+    )
+  } catch (err) {
+    logStep('checkout.sessions.list by customer failed', {
+      invoiceId: invoice.id,
+      customerId,
+      message: err instanceof Error ? err.message : String(err),
+    })
+    return null
+  }
+}
+
+function buildLastResortDonor(
+  email: string,
+  invoice: Stripe.Invoice,
+  meta: Stripe.Metadata,
+): DonorFields {
+  const localPart = email.split('@')[0] ?? 'Supporter'
+  const firstName =
+    localPart.replace(/[._-]+/g, ' ').trim() || 'Supporter'
+
+  return {
+    firstName: firstName.charAt(0).toUpperCase() + firstName.slice(1),
+    lastName: 'Supporter',
+    email: email.toLowerCase(),
+    message: meta.message?.trim() || null,
+    bags:
+      meta.donation_type === 'contribution'
+        ? 0
+        : deriveBagsFromInvoiceLines(invoice),
+  }
 }
 
 function deriveBagsFromLineItems(session: Stripe.Checkout.Session): number {
@@ -188,6 +300,7 @@ async function resolveDonationFields(
 
 async function resolveDonationFieldsFromInvoice(
   invoice: Stripe.Invoice,
+  hintedCheckoutSession?: Stripe.Checkout.Session,
 ): Promise<DonorFields | null> {
   const subscriptionId = getInvoiceSubscriptionId(invoice)
 
@@ -196,26 +309,25 @@ async function resolveDonationFieldsFromInvoice(
   let checkoutCustomerName: { firstName: string; lastName: string } | undefined
   let checkoutEmail = ''
 
+  const checkoutSession = await findCheckoutSessionForInvoice(
+    invoice,
+    subscriptionId,
+    hintedCheckoutSession,
+  )
+
+  if (checkoutSession) {
+    const hints = checkoutSessionDonorHints(checkoutSession)
+    checkoutSessionMeta = hints.meta
+    checkoutCustomerName = hints.name
+    checkoutEmail = hints.email
+  }
+
   if (subscriptionId) {
     try {
       const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
       subscriptionMeta = subscription.metadata ?? {}
-
-      const sessions = await getStripe().checkout.sessions.list({
-        subscription: subscriptionId,
-        limit: 1,
-      })
-      const session = sessions.data[0]
-      if (session) {
-        checkoutSessionMeta = session.metadata ?? {}
-        checkoutCustomerName = splitCustomerName(session.customer_details?.name)
-        checkoutEmail =
-          session.customer_email?.trim() ||
-          session.customer_details?.email?.trim() ||
-          ''
-      }
     } catch (err) {
-      logStep('failed to load subscription or checkout session for invoice', {
+      logStep('failed to load subscription for invoice', {
         invoiceId: invoice.id,
         subscriptionId,
         message: err instanceof Error ? err.message : String(err),
@@ -258,6 +370,14 @@ async function resolveDonationFieldsFromInvoice(
 
   let donor = resolveDonorFromMetadata(meta, emailFallback, nameFallback)
 
+  if (!donor && emailFallback) {
+    logStep('using last-resort donor details from invoice customer email', {
+      invoiceId: invoice.id,
+      email: emailFallback,
+    })
+    donor = buildLastResortDonor(emailFallback, invoice, meta)
+  }
+
   if (!donor) {
     logStep('missing required donor fields on subscription metadata', {
       invoiceId: invoice.id,
@@ -266,6 +386,7 @@ async function resolveDonationFieldsFromInvoice(
       checkoutMetadataKeys: Object.keys(checkoutSessionMeta),
       subscriptionMetadataKeys: Object.keys(subscriptionMeta),
       customerEmail: invoice.customer_email,
+      hadCheckoutSession: Boolean(checkoutSession),
     })
     return null
   }
@@ -484,13 +605,50 @@ async function recordDonationFromSession(
           invoiceId: latestInvoice.id,
           subscriptionId,
         })
-        return recordDonationFromInvoice(latestInvoice)
+        return recordDonationFromInvoice(latestInvoice, session)
       }
     } catch (err) {
       logStep('failed to process subscription checkout via latest invoice', {
         sessionId: session.id,
         subscriptionId,
         message: err instanceof Error ? err.message : String(err),
+      })
+    }
+
+    const donor = await resolveDonationFields(session)
+    if (donor) {
+      let amountCents = session.amount_total ?? 0
+      let stripePaymentId = session.id
+
+      try {
+        const subscription = await getStripe().subscriptions.retrieve(subscriptionId, {
+          expand: ['latest_invoice'],
+        })
+        const latestInvoice = subscription.latest_invoice
+        if (latestInvoice && typeof latestInvoice === 'object') {
+          amountCents = latestInvoice.amount_paid || amountCents
+          stripePaymentId = latestInvoice.id
+        }
+      } catch (err) {
+        logStep('failed to load latest invoice for subscription checkout fallback', {
+          sessionId: session.id,
+          subscriptionId,
+          message: err instanceof Error ? err.message : String(err),
+        })
+      }
+
+      logStep('processing subscription checkout via session metadata fallback', {
+        sessionId: session.id,
+        stripePaymentId,
+        subscriptionId,
+      })
+
+      return persistDonationAndNotify({
+        donor,
+        amountCents,
+        stripePaymentId,
+        isRecurring: true,
+        sourceId: session.id,
       })
     }
 
@@ -579,13 +737,14 @@ async function recordDonationFromSession(
 
 async function recordDonationFromInvoice(
   invoice: Stripe.Invoice,
+  checkoutSession?: Stripe.Checkout.Session,
 ): Promise<NextResponse> {
   const invoiceId = invoice.id
 
   let fullInvoice = invoice
   try {
     fullInvoice = await getStripe().invoices.retrieve(invoiceId, {
-      expand: ['customer', 'lines'],
+      expand: ['customer', 'lines', 'subscription'],
     })
   } catch (err) {
     logStep('failed to retrieve full invoice — using webhook payload', {
@@ -620,7 +779,10 @@ async function recordDonationFromInvoice(
     })
   }
 
-  const donor = await resolveDonationFieldsFromInvoice(fullInvoice)
+  const donor = await resolveDonationFieldsFromInvoice(
+    fullInvoice,
+    checkoutSession,
+  )
   if (!donor) {
     return NextResponse.json(
       {
