@@ -94,6 +94,21 @@ function parseBagsFromMetadata(
   return fallback
 }
 
+function mergeMetadata(
+  ...sources: Array<Stripe.Metadata | null | undefined>
+): Stripe.Metadata {
+  const merged: Stripe.Metadata = {}
+  for (const source of sources) {
+    if (!source) continue
+    for (const [key, value] of Object.entries(source)) {
+      if (value?.trim()) {
+        merged[key] = value
+      }
+    }
+  }
+  return merged
+}
+
 function resolveDonorFromMetadata(
   meta: Stripe.Metadata,
   emailFallback: string,
@@ -107,10 +122,13 @@ function resolveDonorFromMetadata(
     ''
 
   const firstName = meta.first_name?.trim() || customerName.firstName
-  const lastName = meta.last_name?.trim() || customerName.lastName
+  const lastName =
+    meta.last_name?.trim() ||
+    customerName.lastName ||
+    (firstName ? 'Supporter' : '')
   const bags = parseBagsFromMetadata(meta, meta.donation_type === 'contribution' ? 0 : 1)
 
-  if (!email || !firstName || !lastName) {
+  if (!email || !firstName) {
     return null
   }
 
@@ -171,26 +189,72 @@ async function resolveDonationFields(
 async function resolveDonationFieldsFromInvoice(
   invoice: Stripe.Invoice,
 ): Promise<DonorFields | null> {
-  let meta: Stripe.Metadata = invoice.subscription_details?.metadata ?? {}
-
   const subscriptionId = getInvoiceSubscriptionId(invoice)
 
-  if (Object.keys(meta).length === 0 && subscriptionId) {
-    const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-    meta = subscription.metadata ?? {}
+  let subscriptionMeta: Stripe.Metadata = {}
+  let checkoutSessionMeta: Stripe.Metadata = {}
+  let checkoutCustomerName: { firstName: string; lastName: string } | undefined
+  let checkoutEmail = ''
+
+  if (subscriptionId) {
+    try {
+      const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
+      subscriptionMeta = subscription.metadata ?? {}
+
+      const sessions = await getStripe().checkout.sessions.list({
+        subscription: subscriptionId,
+        limit: 1,
+      })
+      const session = sessions.data[0]
+      if (session) {
+        checkoutSessionMeta = session.metadata ?? {}
+        checkoutCustomerName = splitCustomerName(session.customer_details?.name)
+        checkoutEmail =
+          session.customer_email?.trim() ||
+          session.customer_details?.email?.trim() ||
+          ''
+      }
+    } catch (err) {
+      logStep('failed to load subscription or checkout session for invoice', {
+        invoiceId: invoice.id,
+        subscriptionId,
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
   }
 
-  const customer =
-    typeof invoice.customer === 'object' && invoice.customer && !invoice.customer.deleted
-      ? invoice.customer
-      : null
+  const meta = mergeMetadata(
+    checkoutSessionMeta,
+    subscriptionMeta,
+    invoice.subscription_details?.metadata,
+  )
+
+  let customer: Stripe.Customer | Stripe.DeletedCustomer | null =
+    typeof invoice.customer === 'object' ? invoice.customer : null
+
+  if (!customer && typeof invoice.customer === 'string') {
+    try {
+      customer = await getStripe().customers.retrieve(invoice.customer)
+    } catch (err) {
+      logStep('failed to retrieve customer for invoice', {
+        invoiceId: invoice.id,
+        customerId: invoice.customer,
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
+  }
+
+  const activeCustomer =
+    customer && !customer.deleted ? customer : null
 
   const emailFallback =
+    checkoutEmail ||
     invoice.customer_email?.trim() ||
-    customer?.email?.trim() ||
+    activeCustomer?.email?.trim() ||
     ''
 
-  const nameFallback = splitCustomerName(customer?.name)
+  const nameFallback =
+    checkoutCustomerName ?? splitCustomerName(activeCustomer?.name)
 
   let donor = resolveDonorFromMetadata(meta, emailFallback, nameFallback)
 
@@ -199,6 +263,8 @@ async function resolveDonationFieldsFromInvoice(
       invoiceId: invoice.id,
       subscriptionId,
       metadataKeys: Object.keys(meta),
+      checkoutMetadataKeys: Object.keys(checkoutSessionMeta),
+      subscriptionMetadataKeys: Object.keys(subscriptionMeta),
       customerEmail: invoice.customer_email,
     })
     return null
