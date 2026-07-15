@@ -51,6 +51,22 @@ function splitCustomerName(name: string | null | undefined): {
   }
 }
 
+function deriveBagsFromInvoiceLines(invoice: Stripe.Invoice): number {
+  const lines = invoice.lines?.data ?? []
+  const total = lines.reduce((sum, line) => sum + (line.quantity ?? 0), 0)
+  return total > 0 ? total : 1
+}
+
+function getInvoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
+  if (typeof invoice.subscription === 'string') {
+    return invoice.subscription
+  }
+  if (invoice.subscription?.id) {
+    return invoice.subscription.id
+  }
+  return null
+}
+
 function deriveBagsFromLineItems(session: Stripe.Checkout.Session): number {
   const lineItems = session.line_items?.data
   if (!lineItems?.length) return 1
@@ -155,24 +171,29 @@ async function resolveDonationFields(
 async function resolveDonationFieldsFromInvoice(
   invoice: Stripe.Invoice,
 ): Promise<DonorFields | null> {
-  const subscriptionId =
-    typeof invoice.subscription === 'string'
-      ? invoice.subscription
-      : invoice.subscription?.id
+  let meta: Stripe.Metadata = invoice.subscription_details?.metadata ?? {}
 
-  if (!subscriptionId) {
-    logStep('invoice.paid missing subscription id', {
-      invoiceId: invoice.id,
-    })
-    return null
+  const subscriptionId = getInvoiceSubscriptionId(invoice)
+
+  if (Object.keys(meta).length === 0 && subscriptionId) {
+    const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
+    meta = subscription.metadata ?? {}
   }
 
-  const subscription = await getStripe().subscriptions.retrieve(subscriptionId)
-  const meta = subscription.metadata ?? {}
+  const customer =
+    typeof invoice.customer === 'object' && invoice.customer && !invoice.customer.deleted
+      ? invoice.customer
+      : null
 
-  const emailFallback = invoice.customer_email?.trim() ?? ''
+  const emailFallback =
+    invoice.customer_email?.trim() ||
+    customer?.email?.trim() ||
+    ''
 
-  const donor = resolveDonorFromMetadata(meta, emailFallback)
+  const nameFallback = splitCustomerName(customer?.name)
+
+  let donor = resolveDonorFromMetadata(meta, emailFallback, nameFallback)
+
   if (!donor) {
     logStep('missing required donor fields on subscription metadata', {
       invoiceId: invoice.id,
@@ -181,6 +202,14 @@ async function resolveDonationFieldsFromInvoice(
       customerEmail: invoice.customer_email,
     })
     return null
+  }
+
+  if (
+    donor.bags <= 0 &&
+    meta.donation_type !== 'contribution' &&
+    meta.bags?.trim() !== '0'
+  ) {
+    donor = { ...donor, bags: deriveBagsFromInvoiceLines(invoice) }
   }
 
   return donor
@@ -280,25 +309,26 @@ async function persistDonationAndNotify({
     ? 'Thank you for your monthly gift — Bags of Groceries Tasmania'
     : 'Thank you for your donation — Bags of Groceries Tasmania'
 
-  try {
-    await sendEmail({
-      to: donor.email,
-      subject: receiptSubject,
-      react: createElement(DonationReceiptEmail, {
-        firstName: donor.firstName,
-        bags: donor.bags,
-        amount,
-        isRecurring,
-      }),
-    })
-  } catch (emailErr) {
-    logStep('donor receipt email failed (donation saved)', {
-      sourceId,
-      stripePaymentId,
-      recipient: donor.email,
-      isDuplicateDonation,
-      message: emailErr instanceof Error ? emailErr.message : String(emailErr),
-    })
+  if (!isDuplicateDonation) {
+    try {
+      await sendEmail({
+        to: donor.email,
+        subject: receiptSubject,
+        react: createElement(DonationReceiptEmail, {
+          firstName: donor.firstName,
+          bags: donor.bags,
+          amount,
+          isRecurring,
+        }),
+      })
+    } catch (emailErr) {
+      logStep('donor receipt email failed (donation saved)', {
+        sourceId,
+        stripePaymentId,
+        recipient: donor.email,
+        message: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      })
+    }
   }
 
   if (!isDuplicateDonation) {
@@ -355,12 +385,56 @@ async function recordDonationFromSession(
   })
 
   if (session.mode === 'subscription') {
-    logStep('skipping insert — subscription checkout handled by invoice.paid', {
+    const subscriptionId =
+      typeof session.subscription === 'string'
+        ? session.subscription
+        : session.subscription?.id
+
+    if (!subscriptionId) {
+      logStep('subscription checkout missing subscription id', {
+        sessionId: session.id,
+      })
+      return NextResponse.json({
+        received: true,
+        skipped: 'subscription_no_id',
+        sessionId: session.id,
+      })
+    }
+
+    try {
+      const subscription = await getStripe().subscriptions.retrieve(subscriptionId, {
+        expand: ['latest_invoice'],
+      })
+      const latestInvoice = subscription.latest_invoice
+
+      if (
+        latestInvoice &&
+        typeof latestInvoice === 'object' &&
+        latestInvoice.status === 'paid' &&
+        latestInvoice.amount_paid > 0
+      ) {
+        logStep('processing subscription checkout via latest invoice', {
+          sessionId: session.id,
+          invoiceId: latestInvoice.id,
+          subscriptionId,
+        })
+        return recordDonationFromInvoice(latestInvoice)
+      }
+    } catch (err) {
+      logStep('failed to process subscription checkout via latest invoice', {
+        sessionId: session.id,
+        subscriptionId,
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
+
+    logStep('subscription checkout awaiting invoice.paid', {
       sessionId: session.id,
+      subscriptionId,
     })
     return NextResponse.json({
       received: true,
-      skipped: 'subscription_checkout',
+      skipped: 'subscription_awaiting_invoice',
       sessionId: session.id,
     })
   }
@@ -440,31 +514,53 @@ async function recordDonationFromSession(
 async function recordDonationFromInvoice(
   invoice: Stripe.Invoice,
 ): Promise<NextResponse> {
-  logStep('processing invoice.paid', {
-    invoiceId: invoice.id,
-    subscriptionId:
-      typeof invoice.subscription === 'string'
-        ? invoice.subscription
-        : invoice.subscription?.id,
-    amountPaid: invoice.amount_paid,
-    status: invoice.status,
-  })
+  const invoiceId = invoice.id
 
-  if (invoice.status !== 'paid' || invoice.amount_paid <= 0) {
-    return NextResponse.json({
-      received: true,
-      skipped: 'invoice_not_paid',
-      invoiceId: invoice.id,
+  let fullInvoice = invoice
+  try {
+    fullInvoice = await getStripe().invoices.retrieve(invoiceId, {
+      expand: ['customer', 'lines'],
+    })
+  } catch (err) {
+    logStep('failed to retrieve full invoice — using webhook payload', {
+      invoiceId,
+      message: err instanceof Error ? err.message : String(err),
     })
   }
 
-  const donor = await resolveDonationFieldsFromInvoice(invoice)
+  logStep('processing invoice.paid', {
+    invoiceId: fullInvoice.id,
+    subscriptionId: getInvoiceSubscriptionId(fullInvoice),
+    amountPaid: fullInvoice.amount_paid,
+    status: fullInvoice.status,
+  })
+
+  if (fullInvoice.status !== 'paid' || fullInvoice.amount_paid <= 0) {
+    return NextResponse.json({
+      received: true,
+      skipped: 'invoice_not_paid',
+      invoiceId: fullInvoice.id,
+    })
+  }
+
+  if (!getInvoiceSubscriptionId(fullInvoice)) {
+    logStep('invoice.paid missing subscription id', {
+      invoiceId: fullInvoice.id,
+    })
+    return NextResponse.json({
+      received: true,
+      skipped: 'invoice_not_subscription',
+      invoiceId: fullInvoice.id,
+    })
+  }
+
+  const donor = await resolveDonationFieldsFromInvoice(fullInvoice)
   if (!donor) {
     return NextResponse.json(
       {
         error: 'Invoice missing required donor fields',
         step: 'donor_validation',
-        invoiceId: invoice.id,
+        invoiceId: fullInvoice.id,
       },
       { status: 422 },
     )
@@ -472,10 +568,10 @@ async function recordDonationFromInvoice(
 
   return persistDonationAndNotify({
     donor,
-    amountCents: invoice.amount_paid,
-    stripePaymentId: invoice.id,
+    amountCents: fullInvoice.amount_paid,
+    stripePaymentId: fullInvoice.id,
     isRecurring: true,
-    sourceId: invoice.id,
+    sourceId: fullInvoice.id,
   })
 }
 
