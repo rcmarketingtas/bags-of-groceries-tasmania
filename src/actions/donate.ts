@@ -5,13 +5,29 @@ import {
   getStripe,
   getStripeConfigErrors,
   getDonationTier,
+  resolveDonationTier,
   stripeErrorMessage,
+  type DonationTierId,
 } from '@/lib/stripe'
 import { rateLimit } from '@/lib/rate-limit'
 import { donationSchema } from '@/lib/validations'
 import { getSiteUrl } from '@/lib/site-url'
 
 const MAX_BAGS = 1000
+
+function tierIdFromPriceId(priceId: string): DonationTierId | undefined {
+  const tier = getDonationTier(priceId)
+  if (tier) return tier.id
+
+  for (const id of ['CONTRIBUTE_25', 'FAMILY_BAG'] as const) {
+    const monthly = resolveDonationTier(id, 'monthly')
+    const oneTime = resolveDonationTier(id, 'one_time')
+    if (monthly?.priceId === priceId || oneTime?.priceId === priceId) {
+      return id
+    }
+  }
+  return undefined
+}
 
 export async function createCheckoutSession(
   formData: FormData,
@@ -39,6 +55,7 @@ export async function createCheckoutSession(
     email: formData.get('email'),
     message: (formData.get('message') as string) || undefined,
     priceId: formData.get('priceId'),
+    givingFrequency: (formData.get('givingFrequency') as string) || 'monthly',
   }
 
   const result = donationSchema.safeParse(raw)
@@ -46,10 +63,15 @@ export async function createCheckoutSession(
     return { error: result.error.errors[0].message }
   }
 
-  const { firstName, lastName, email, message, priceId } = result.data
-  const tier = getDonationTier(priceId)
+  const { firstName, lastName, email, message, priceId, givingFrequency } =
+    result.data
 
-  if (!tier) {
+  const tierId = tierIdFromPriceId(priceId)
+  const tier = tierId
+    ? resolveDonationTier(tierId, givingFrequency)
+    : getDonationTier(priceId)
+
+  if (!tier || tier.priceId !== priceId) {
     return {
       error:
         'Invalid product selected. Check Stripe price IDs are set correctly in your environment.',
@@ -66,21 +88,33 @@ export async function createCheckoutSession(
 
   const bags = tier.bags * quantity
   const siteUrl = getSiteUrl()
+  const isMonthly = givingFrequency === 'monthly'
+
+  const metadata = {
+    first_name: firstName,
+    last_name: lastName,
+    email,
+    message: message ?? '',
+    bags: bags.toString(),
+    donation_type: tier.donationType,
+    giving_frequency: givingFrequency,
+  }
 
   try {
     const session = await getStripe().checkout.sessions.create({
-      mode: 'payment',
+      mode: isMonthly ? 'subscription' : 'payment',
       line_items: [{ price: priceId, quantity }],
-      allow_promotion_codes: tier.donationType === 'full_bag',
+      allow_promotion_codes:
+        !isMonthly && tier.donationType === 'full_bag',
       customer_email: email,
-      metadata: {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        message: message ?? '',
-        bags: bags.toString(),
-        donation_type: tier.donationType,
-      },
+      metadata,
+      ...(isMonthly
+        ? {
+            subscription_data: {
+              metadata,
+            },
+          }
+        : {}),
       success_url: `${siteUrl}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/sponsor`,
     })

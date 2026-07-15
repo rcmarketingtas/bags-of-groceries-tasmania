@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Html,
   Head,
@@ -14,18 +16,28 @@ interface Props {
   firstName: string
   bags: number
   amount: number
+  isRecurring?: boolean
 }
 
-export default function DonationReceiptEmail({ firstName, bags, amount }: Props) {
+export default function DonationReceiptEmail({
+  firstName,
+  bags,
+  amount,
+  isRecurring = false,
+}: Props) {
   const isContribution = bags === 0
 
   return (
     <Html>
       <Head />
       <Preview>
-        {isContribution
-          ? `Thank you for your $${amount.toFixed(0)} contribution — Bags of Groceries Tasmania`
-          : `Thank you for sponsoring ${bags} grocery bag${bags > 1 ? 's' : ''} — Bags of Groceries Tasmania`}
+        {isRecurring
+          ? isContribution
+            ? `Thank you for your monthly $${amount.toFixed(0)} gift — Bags of Groceries Tasmania`
+            : `Thank you for your monthly gift — Bags of Groceries Tasmania`
+          : isContribution
+            ? `Thank you for your $${amount.toFixed(0)} contribution — Bags of Groceries Tasmania`
+            : `Thank you for sponsoring ${bags} grocery bag${bags > 1 ? 's' : ''} — Bags of Groceries Tasmania`}
       </Preview>
       <Body style={body}>
         <Container style={container}>
@@ -40,18 +52,21 @@ export default function DonationReceiptEmail({ firstName, bags, amount }: Props)
             <Text style={text}>
               {isContribution ? (
                 <>
-                  Your generous <strong>${amount.toFixed(2)} AUD</strong> contribution
-                  has been received. It helps us keep supporting Tasmanian families
-                  through Bags of Groceries.
+                  Your generous{' '}
+                  {isRecurring ? 'monthly ' : null}
+                  <strong>${amount.toFixed(2)} AUD</strong>{' '}
+                  {isRecurring ? 'gift has been received' : 'contribution has been received'}.
+                  It helps us keep supporting Tasmanian families through Bags of Groceries.
                 </>
               ) : (
                 <>
-                  Your generous donation has been received and processed. You have
-                  sponsored{' '}
+                  Your generous {isRecurring ? 'monthly ' : null}donation has been received
+                  and processed. You have sponsored{' '}
                   <strong>
                     {bags} grocery bag{bags > 1 ? 's' : ''}
                   </strong>{' '}
-                  for a Tasmanian family in need.
+                  for a Tasmanian family in need
+                  {isRecurring ? ' this month' : null}.
                 </>
               )}
             </Text>
@@ -60,6 +75,7 @@ export default function DonationReceiptEmail({ firstName, bags, amount }: Props)
               <Text style={summaryTitle}>Donation Summary</Text>
               <Text style={summaryLine}>
                 Amount paid: <strong>${amount.toFixed(2)} AUD</strong>
+                {isRecurring ? ' (monthly)' : null}
               </Text>
               {!isContribution ? (
                 <Text style={summaryLine}>
@@ -73,6 +89,9 @@ export default function DonationReceiptEmail({ firstName, bags, amount }: Props)
               families experiencing hardship.
               {!isContribution
                 ? ' Groceries will be prepared and delivered by our supermarket partner.'
+                : null}
+              {isRecurring
+                ? ' You can manage or cancel your subscription through Stripe at any time.'
                 : null}
             </Text>
 

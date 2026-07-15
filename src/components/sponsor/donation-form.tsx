@@ -2,13 +2,13 @@
 
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
-import { ShoppingBag, Minus, Plus, Loader2, AlertCircle, Check, Heart } from 'lucide-react'
+import { ShoppingBag, Minus, Plus, Loader2, AlertCircle, Check, Heart, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { createCheckoutSession } from '@/actions/donate'
-import type { DonationTierId } from '@/lib/stripe'
+import type { DonationTierId, GivingFrequency } from '@/lib/stripe'
 
 const BAG_PRICE = 50
 const CONTRIBUTE_PRICE = 25
@@ -78,12 +78,39 @@ function ProgressDial({ quantity }: { quantity: number }) {
 interface DonationFormProps {
   priceFamilyBagId: string
   priceContribute25Id?: string
+  priceFamilyBagMonthlyId?: string
+  priceContribute25MonthlyId?: string
+  monthlyGivingConfigured?: boolean
 }
 
-export function DonationForm({
-  priceFamilyBagId,
-  priceContribute25Id,
-}: DonationFormProps) {
+function resolvePriceId(
+  tier: DonationTierId,
+  frequency: GivingFrequency,
+  props: DonationFormProps,
+): string {
+  if (frequency === 'monthly') {
+    if (tier === 'CONTRIBUTE_25' && props.priceContribute25MonthlyId) {
+      return props.priceContribute25MonthlyId
+    }
+    return props.priceFamilyBagMonthlyId ?? props.priceFamilyBagId
+  }
+
+  if (tier === 'CONTRIBUTE_25' && props.priceContribute25Id) {
+    return props.priceContribute25Id
+  }
+  return props.priceFamilyBagId
+}
+
+export function DonationForm(props: DonationFormProps) {
+  const {
+    priceFamilyBagId,
+    priceContribute25Id,
+    monthlyGivingConfigured = false,
+  } = props
+
+  const [givingFrequency, setGivingFrequency] = useState<GivingFrequency>(
+    monthlyGivingConfigured ? 'monthly' : 'one_time',
+  )
   const [selectedTier, setSelectedTier] = useState<DonationTierId>(
     priceContribute25Id ? 'CONTRIBUTE_25' : 'FAMILY_BAG',
   )
@@ -92,10 +119,8 @@ export function DonationForm({
   const [isPending, startTransition] = useTransition()
 
   const isFullBag = selectedTier === 'FAMILY_BAG'
-  const selectedPriceId =
-    selectedTier === 'CONTRIBUTE_25' && priceContribute25Id
-      ? priceContribute25Id
-      : priceFamilyBagId
+  const isMonthly = givingFrequency === 'monthly'
+  const selectedPriceId = resolvePriceId(selectedTier, givingFrequency, props)
   const total = isFullBag ? quantity * BAG_PRICE : CONTRIBUTE_PRICE
 
   function decrement() { setQuantity((q) => Math.max(1, q - 1)) }
@@ -105,6 +130,7 @@ export function DonationForm({
     setError(undefined)
     formData.set('priceId', selectedPriceId)
     formData.set('quantity', isFullBag ? quantity.toString() : '1')
+    formData.set('givingFrequency', givingFrequency)
     startTransition(async () => {
       const result = await createCheckoutSession(formData)
       if (result.error) setError(result.error)
@@ -112,9 +138,22 @@ export function DonationForm({
     })
   }
 
-  const submitLabel = isFullBag
-    ? `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries ($${total}.00)`
-    : `Give $${CONTRIBUTE_PRICE} to Support the Program`
+  const submitLabel = (() => {
+    if (isMonthly) {
+      if (isFullBag) {
+        if (quantity === 1) {
+          return `Give $${BAG_PRICE}/month`
+        }
+        return `Give ${quantity} bags/month ($${total}/month)`
+      }
+      return `Give $${CONTRIBUTE_PRICE}/month`
+    }
+
+    if (isFullBag) {
+      return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries ($${total}.00)`
+    }
+    return `Give $${CONTRIBUTE_PRICE} to Support the Program`
+  })()
 
   return (
     <div className="space-y-8">
@@ -131,9 +170,55 @@ export function DonationForm({
         </ul>
       </div>
 
-      {/* Tier selection */}
+      {/* Frequency selection */}
       <div>
         <h2 className="mb-4 text-lg font-semibold text-white">Choose how to give</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => monthlyGivingConfigured && setGivingFrequency('monthly')}
+            disabled={!monthlyGivingConfigured}
+            className={`rounded-xl border p-4 text-left transition-colors ${
+              givingFrequency === 'monthly'
+                ? 'border-[#A3C2B2] bg-[#163d27]/80'
+                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+            } ${!monthlyGivingConfigured ? 'cursor-not-allowed opacity-60' : ''}`}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-[#A3C2B2]" />
+              <span className="font-semibold text-white">Give monthly</span>
+            </div>
+            <p className="text-sm text-[#A3C2B2]">
+              Ongoing support — cancel anytime via Stripe.
+            </p>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setGivingFrequency('one_time')}
+            className={`rounded-xl border p-4 text-left transition-colors ${
+              givingFrequency === 'one_time'
+                ? 'border-white bg-white/10'
+                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+            }`}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <Heart className="h-4 w-4 text-white" />
+              <span className="font-semibold text-white">One-time</span>
+            </div>
+            <p className="text-sm text-[#A3C2B2]">A single gift today.</p>
+          </button>
+        </div>
+        {!monthlyGivingConfigured ? (
+          <p className="mt-2 text-xs text-[#A3C2B2]/70">
+            Monthly giving will appear once monthly Stripe prices are configured.
+          </p>
+        ) : null}
+      </div>
+
+      {/* Tier selection */}
+      <div>
+        <h2 className="mb-4 text-lg font-semibold text-white">Choose an amount</h2>
         <div className={`grid gap-3 ${priceContribute25Id ? 'sm:grid-cols-2' : ''}`}>
           {priceContribute25Id ? (
             <button
@@ -148,6 +233,9 @@ export function DonationForm({
               <div className="mb-2 flex items-center gap-2">
                 <Heart className="h-4 w-4 text-[#A3C2B2]" />
                 <span className="font-semibold text-white">$25</span>
+                {isMonthly ? (
+                  <span className="text-xs text-[#A3C2B2]/70">/month</span>
+                ) : null}
               </div>
               <p className="text-sm text-[#A3C2B2]">Support the program</p>
               <p className="mt-1 text-xs text-[#A3C2B2]/70">
@@ -168,6 +256,9 @@ export function DonationForm({
             <div className="mb-2 flex items-center gap-2">
               <ShoppingBag className="h-4 w-4 text-white" />
               <span className="font-semibold text-white">$50</span>
+              {isMonthly ? (
+                <span className="text-xs text-[#A3C2B2]/70">/month</span>
+              ) : null}
             </div>
             <p className="text-sm text-[#A3C2B2]">Full bag for a family</p>
             <p className="mt-1 text-xs text-[#A3C2B2]/70">
@@ -194,36 +285,38 @@ export function DonationForm({
             </p>
           </div>
 
-          <div>
-            <h2 className="mb-4 text-lg font-semibold text-white">
-              How many bags of groceries?
-            </h2>
-            <ProgressDial quantity={quantity} />
-            <div className="mt-6 flex items-center justify-center gap-6">
-              <button
-                type="button"
-                onClick={decrement}
-                disabled={quantity <= 1}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Remove one bag"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <div className="min-w-[120px] text-center">
-                <p className="text-sm text-[#A3C2B2]">{quantity} × $50 =</p>
-                <p className="text-2xl font-bold text-white">${total}.00</p>
+          {!isMonthly ? (
+            <div>
+              <h2 className="mb-4 text-lg font-semibold text-white">
+                How many bags of groceries?
+              </h2>
+              <ProgressDial quantity={quantity} />
+              <div className="mt-6 flex items-center justify-center gap-6">
+                <button
+                  type="button"
+                  onClick={decrement}
+                  disabled={quantity <= 1}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Remove one bag"
+                >
+                  <Minus className="h-4 w-4" />
+                </button>
+                <div className="min-w-[120px] text-center">
+                  <p className="text-sm text-[#A3C2B2]">{quantity} × $50 =</p>
+                  <p className="text-2xl font-bold text-white">${total}.00</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={increment}
+                  disabled={quantity >= MAX_BAGS}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Add one bag"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={increment}
-                disabled={quantity >= MAX_BAGS}
-                className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#163d27] bg-[#163d27]/60 text-white transition-colors hover:bg-[#163d27] disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Add one bag"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
             </div>
-          </div>
+          ) : null}
         </>
       ) : null}
 
@@ -231,6 +324,7 @@ export function DonationForm({
       <form action={handleSubmit} className="space-y-6">
         <input type="hidden" name="priceId" value={selectedPriceId} />
         <input type="hidden" name="quantity" value={isFullBag ? quantity : 1} />
+        <input type="hidden" name="givingFrequency" value={givingFrequency} />
 
         <h2 className="text-lg font-semibold text-white">Your details</h2>
 
@@ -294,7 +388,7 @@ export function DonationForm({
 
         <p className="text-center text-xs text-[#A3C2B2]/60">
           Payments processed securely via Stripe.
-          {isFullBag ? ' Have a coupon code? Enter it on the payment page.' : null}
+          {isFullBag && !isMonthly ? ' Have a coupon code? Enter it on the payment page.' : null}
         </p>
       </form>
 

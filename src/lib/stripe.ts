@@ -3,6 +3,7 @@ import Stripe from 'stripe'
 let _stripe: Stripe | null = null
 
 export type DonationTierId = 'CONTRIBUTE_25' | 'FAMILY_BAG'
+export type GivingFrequency = 'monthly' | 'one_time'
 
 export type DonationTier = {
   id: DonationTierId
@@ -31,6 +32,25 @@ export function getFamilyBagPriceId(): string | undefined {
 
 export function getContribute25PriceId(): string | undefined {
   return process.env.STRIPE_PRICE_CONTRIBUTE_25
+}
+
+export function getFamilyBagMonthlyPriceId(): string | undefined {
+  return process.env.STRIPE_PRICE_FAMILY_BAG_MONTHLY
+}
+
+export function getContribute25MonthlyPriceId(): string | undefined {
+  return process.env.STRIPE_PRICE_CONTRIBUTE_25_MONTHLY
+}
+
+export function isMonthlyGivingConfigured(): boolean {
+  const contribute25 = getContribute25MonthlyPriceId()
+  const familyBag = getFamilyBagMonthlyPriceId()
+  const hasContribute25OneTime = Boolean(getContribute25PriceId())
+
+  if (hasContribute25OneTime) {
+    return Boolean(contribute25 && familyBag)
+  }
+  return Boolean(familyBag)
 }
 
 export function getStripeProducts(): Record<DonationTierId, DonationTier> {
@@ -64,6 +84,34 @@ export function getDonationTier(priceId: string): DonationTier | undefined {
   return getAvailableDonationTiers().find((tier) => tier.priceId === priceId)
 }
 
+export function resolveDonationPriceId(
+  tierId: DonationTierId,
+  frequency: GivingFrequency,
+): string | undefined {
+  if (frequency === 'monthly') {
+    if (tierId === 'CONTRIBUTE_25') {
+      return getContribute25MonthlyPriceId()
+    }
+    return getFamilyBagMonthlyPriceId()
+  }
+
+  if (tierId === 'CONTRIBUTE_25') {
+    return getContribute25PriceId()
+  }
+  return getFamilyBagPriceId()
+}
+
+export function resolveDonationTier(
+  tierId: DonationTierId,
+  frequency: GivingFrequency,
+): DonationTier | undefined {
+  const priceId = resolveDonationPriceId(tierId, frequency)
+  if (!priceId) return undefined
+
+  const base = getStripeProducts()[tierId]
+  return { ...base, priceId }
+}
+
 /** @deprecated use getStripeProducts() */
 export const STRIPE_PRODUCTS = getStripeProducts()
 
@@ -85,6 +133,16 @@ export function getStripeConfigErrors(): string[] {
   const contribute25 = process.env.STRIPE_PRICE_CONTRIBUTE_25
   if (contribute25 && !contribute25.startsWith('price_')) {
     errors.push('STRIPE_PRICE_CONTRIBUTE_25 must start with price_')
+  }
+
+  const contribute25Monthly = process.env.STRIPE_PRICE_CONTRIBUTE_25_MONTHLY
+  if (contribute25Monthly && !contribute25Monthly.startsWith('price_')) {
+    errors.push('STRIPE_PRICE_CONTRIBUTE_25_MONTHLY must start with price_')
+  }
+
+  const familyBagMonthly = process.env.STRIPE_PRICE_FAMILY_BAG_MONTHLY
+  if (familyBagMonthly && !familyBagMonthly.startsWith('price_')) {
+    errors.push('STRIPE_PRICE_FAMILY_BAG_MONTHLY must start with price_')
   }
 
   if (!process.env.NEXT_PUBLIC_SITE_URL) {

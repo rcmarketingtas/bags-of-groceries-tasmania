@@ -4,7 +4,14 @@ import { DonorLeaderboard } from '@/components/home/donor-leaderboard'
 import { DonationForm } from '@/components/sponsor/donation-form'
 import { FB_PAGE_URL } from '@/lib/facebook'
 import { getTotalBagsDelivered } from '@/lib/donations'
-import { getContribute25PriceId, getFamilyBagPriceId, getStripeConfigErrors } from '@/lib/stripe'
+import {
+  getContribute25PriceId,
+  getFamilyBagPriceId,
+  getContribute25MonthlyPriceId,
+  getFamilyBagMonthlyPriceId,
+  isMonthlyGivingConfigured,
+  getStripeConfigErrors,
+} from '@/lib/stripe'
 
 export const metadata: Metadata = {
   title: 'Give a Bag of Groceries',
@@ -16,6 +23,9 @@ export const dynamic = 'force-dynamic'
 export default async function SponsorPage() {
   const priceFamilyBagId = getFamilyBagPriceId() ?? ''
   const priceContribute25Id = getContribute25PriceId()
+  const priceFamilyBagMonthlyId = getFamilyBagMonthlyPriceId()
+  const priceContribute25MonthlyId = getContribute25MonthlyPriceId()
+  const monthlyGivingConfigured = isMonthlyGivingConfigured()
   const stripeConfigErrors = getStripeConfigErrors()
   const totalBags = await getTotalBagsDelivered()
 
@@ -75,6 +85,9 @@ export default async function SponsorPage() {
             <DonationForm
               priceFamilyBagId={priceFamilyBagId}
               priceContribute25Id={priceContribute25Id}
+              priceFamilyBagMonthlyId={priceFamilyBagMonthlyId}
+              priceContribute25MonthlyId={priceContribute25MonthlyId}
+              monthlyGivingConfigured={monthlyGivingConfigured}
             />
           </div>
 

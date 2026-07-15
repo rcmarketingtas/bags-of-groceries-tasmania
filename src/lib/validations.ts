@@ -11,6 +11,7 @@ export const donationSchema = z.object({
     .toLowerCase(),
   message: z.string().max(500, 'Message must be under 500 characters').trim().optional(),
   priceId: z.string().min(1, 'Please select a sponsorship package'),
+  givingFrequency: z.enum(['monthly', 'one_time']).default('monthly'),
 })
 
 export const applicationSchema = z.object({
