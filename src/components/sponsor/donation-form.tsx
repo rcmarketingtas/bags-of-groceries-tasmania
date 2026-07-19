@@ -108,12 +108,8 @@ export function DonationForm(props: DonationFormProps) {
     monthlyGivingConfigured = false,
   } = props
 
-  const [givingFrequency, setGivingFrequency] = useState<GivingFrequency>(
-    monthlyGivingConfigured ? 'monthly' : 'one_time',
-  )
-  const [selectedTier, setSelectedTier] = useState<DonationTierId>(
-    priceContribute25Id ? 'CONTRIBUTE_25' : 'FAMILY_BAG',
-  )
+  const [givingFrequency, setGivingFrequency] = useState<GivingFrequency>('one_time')
+  const [selectedTier, setSelectedTier] = useState<DonationTierId>('FAMILY_BAG')
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState<string>()
   const [isPending, startTransition] = useTransition()
@@ -173,6 +169,22 @@ export function DonationForm(props: DonationFormProps) {
         <div className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
+            onClick={() => setGivingFrequency('one_time')}
+            className={`rounded-xl border p-4 text-left transition-colors ${
+              givingFrequency === 'one_time'
+                ? 'border-white bg-white/10'
+                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+            }`}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <Heart className="h-4 w-4 text-white" />
+              <span className="font-semibold text-white">One-time</span>
+            </div>
+            <p className="text-sm text-[#A3C2B2]">A single gift today.</p>
+          </button>
+
+          <button
+            type="button"
             onClick={() => monthlyGivingConfigured && setGivingFrequency('monthly')}
             disabled={!monthlyGivingConfigured}
             className={`rounded-xl border p-4 text-left transition-colors ${
@@ -189,22 +201,6 @@ export function DonationForm(props: DonationFormProps) {
               Ongoing support for Tasmanian families.
             </p>
           </button>
-
-          <button
-            type="button"
-            onClick={() => setGivingFrequency('one_time')}
-            className={`rounded-xl border p-4 text-left transition-colors ${
-              givingFrequency === 'one_time'
-                ? 'border-white bg-white/10'
-                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
-            }`}
-          >
-            <div className="mb-2 flex items-center gap-2">
-              <Heart className="h-4 w-4 text-white" />
-              <span className="font-semibold text-white">One-time</span>
-            </div>
-            <p className="text-sm text-[#A3C2B2]">A single gift today.</p>
-          </button>
         </div>
         {!monthlyGivingConfigured ? (
           <p className="mt-2 text-xs text-[#A3C2B2]/70">
@@ -217,6 +213,28 @@ export function DonationForm(props: DonationFormProps) {
       <div>
         <h2 className="mb-4 text-lg font-semibold text-white">Choose an amount</h2>
         <div className={`grid gap-3 ${priceContribute25Id ? 'sm:grid-cols-2' : ''}`}>
+          <button
+            type="button"
+            onClick={() => setSelectedTier('FAMILY_BAG')}
+            className={`rounded-xl border p-4 text-left transition-colors ${
+              selectedTier === 'FAMILY_BAG'
+                ? 'border-white bg-white/10'
+                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+            }`}
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <ShoppingBag className="h-4 w-4 text-white" />
+              <span className="font-semibold text-white">$50</span>
+              {isMonthly ? (
+                <span className="text-xs text-[#A3C2B2]/70">/month</span>
+              ) : null}
+            </div>
+            <p className="text-sm text-[#A3C2B2]">Full bag for a family</p>
+            <p className="mt-1 text-xs text-[#A3C2B2]/70">
+              A complete grocery bag delivered to a Tasmanian household.
+            </p>
+          </button>
+
           {priceContribute25Id ? (
             <button
               type="button"
@@ -240,28 +258,6 @@ export function DonationForm(props: DonationFormProps) {
               </p>
             </button>
           ) : null}
-
-          <button
-            type="button"
-            onClick={() => setSelectedTier('FAMILY_BAG')}
-            className={`rounded-xl border p-4 text-left transition-colors ${
-              selectedTier === 'FAMILY_BAG'
-                ? 'border-white bg-white/10'
-                : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
-            }`}
-          >
-            <div className="mb-2 flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4 text-white" />
-              <span className="font-semibold text-white">$50</span>
-              {isMonthly ? (
-                <span className="text-xs text-[#A3C2B2]/70">/month</span>
-              ) : null}
-            </div>
-            <p className="text-sm text-[#A3C2B2]">Full bag for a family</p>
-            <p className="mt-1 text-xs text-[#A3C2B2]/70">
-              A complete grocery bag delivered to a Tasmanian household.
-            </p>
-          </button>
         </div>
       </div>
 

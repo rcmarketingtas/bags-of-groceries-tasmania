@@ -55,7 +55,7 @@ export async function createCheckoutSession(
     email: formData.get('email'),
     message: (formData.get('message') as string) || undefined,
     priceId: formData.get('priceId'),
-    givingFrequency: (formData.get('givingFrequency') as string) || 'monthly',
+    givingFrequency: (formData.get('givingFrequency') as string) || 'one_time',
   }
 
   const result = donationSchema.safeParse(raw)
