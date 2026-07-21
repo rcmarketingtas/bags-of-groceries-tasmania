@@ -15,7 +15,7 @@ import {
 
 export const metadata: Metadata = {
   title: 'Give a Bag of Groceries',
-  description: 'Give from $25 or sponsor a full $50 bag of groceries for a Tasmanian family doing it tough.',
+  description: 'Give from $25 or sponsor a full $46.50 bag of groceries for a Tasmanian family doing it tough.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -126,7 +126,7 @@ export default async function SponsorPage() {
                 },
                 {
                   icon: Utensils,
-                  stat: '$50',
+                  stat: '$46.50',
                   label: 'Covers a full bag of essentials for one family',
                   sub: 'Groceries + delivery',
                 },

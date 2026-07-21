@@ -10,9 +10,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { createCheckoutSession } from '@/actions/donate'
 import type { DonationTierId, GivingFrequency } from '@/lib/stripe'
 
-const BAG_PRICE = 50
+const BAG_PRICE = 46.5
+const BAG_PRICE_LABEL = '$46.50'
 const CONTRIBUTE_PRICE = 25
 const MAX_BAGS = 1000
+
+function formatBagAmount(amount: number): string {
+  return `$${amount.toFixed(2)}`
+}
 
 const BAG_CONTENTS = [
   'Fresh protein (chicken, seasonal affordable cuts, or canned alternatives)',
@@ -137,13 +142,13 @@ export function DonationForm(props: DonationFormProps) {
   const submitLabel = (() => {
     if (isMonthly) {
       if (isFullBag) {
-        return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries ($${total}/month)`
+        return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${formatBagAmount(total)}/month)`
       }
       return `Give $${CONTRIBUTE_PRICE}/month`
     }
 
     if (isFullBag) {
-      return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries ($${total}.00)`
+      return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${formatBagAmount(total)})`
     }
     return `Give $${CONTRIBUTE_PRICE} to Support the Program`
   })()
@@ -224,7 +229,7 @@ export function DonationForm(props: DonationFormProps) {
           >
             <div className="mb-2 flex items-center gap-2">
               <ShoppingBag className="h-4 w-4 text-white" />
-              <span className="font-semibold text-white">$50</span>
+              <span className="font-semibold text-white">{BAG_PRICE_LABEL}</span>
               {isMonthly ? (
                 <span className="text-xs text-[#A3C2B2]/70">/month</span>
               ) : null}
@@ -267,14 +272,14 @@ export function DonationForm(props: DonationFormProps) {
             <div className="overflow-hidden rounded-xl border border-[#163d27]">
               <Image
                 src="/grocery-bag.jpg"
-                alt="A $50 bag of groceries including fresh fruit, vegetables, chicken, mince, eggs, milk, pasta, bread, and pantry staples"
+                alt="A $46.50 bag of groceries including fresh fruit, vegetables, chicken, mince, eggs, milk, pasta, bread, and pantry staples"
                 width={768}
                 height={1024}
                 className="aspect-[3/4] w-full object-cover"
               />
             </div>
             <p className="mt-2 text-center text-sm text-[#A3C2B2]/70">
-              What a $50 bag of groceries looks like
+              What a {BAG_PRICE_LABEL} bag of groceries looks like
             </p>
           </div>
 
@@ -295,10 +300,10 @@ export function DonationForm(props: DonationFormProps) {
               </button>
               <div className="min-w-[120px] text-center">
                 <p className="text-sm text-[#A3C2B2]">
-                  {quantity} × $50{isMonthly ? '/month' : ''} =
+                  {quantity} × {BAG_PRICE_LABEL}{isMonthly ? '/month' : ''} =
                 </p>
                 <p className="text-2xl font-bold text-white">
-                  ${total}{isMonthly ? '/month' : '.00'}
+                  {formatBagAmount(total)}{isMonthly ? '/month' : ''}
                 </p>
               </div>
               <button

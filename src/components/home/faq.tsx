@@ -14,7 +14,7 @@ const faqs = [
   {
     question: 'How much does it cost?',
     answer:
-      'It\'s $50 per bag. You can give as many as you like, each one goes to a different family. Your $50 covers the cost of the groceries and running the program.',
+      'It\'s $46.50 per bag. You can give as many as you like, each one goes to a different family. Your $46.50 covers the cost of the groceries and running the program.',
   },
   {
     question: 'What\u2019s in a grocery bag?',
