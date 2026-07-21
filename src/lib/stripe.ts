@@ -2,7 +2,7 @@ import Stripe from 'stripe'
 
 let _stripe: Stripe | null = null
 
-export type DonationTierId = 'CONTRIBUTE_25' | 'FAMILY_BAG'
+export type DonationTierId = 'CONTRIBUTE_10' | 'CONTRIBUTE_25' | 'FAMILY_BAG'
 export type GivingFrequency = 'monthly' | 'one_time'
 
 export type DonationTier = {
@@ -30,6 +30,10 @@ export function getFamilyBagPriceId(): string | undefined {
   return process.env.STRIPE_PRICE_FAMILY_BAG
 }
 
+export function getContribute10PriceId(): string | undefined {
+  return process.env.STRIPE_PRICE_CONTRIBUTE_10
+}
+
 export function getContribute25PriceId(): string | undefined {
   return process.env.STRIPE_PRICE_CONTRIBUTE_25
 }
@@ -55,6 +59,15 @@ export function isMonthlyGivingConfigured(): boolean {
 
 export function getStripeProducts(): Record<DonationTierId, DonationTier> {
   return {
+    CONTRIBUTE_10: {
+      id: 'CONTRIBUTE_10',
+      priceId: process.env.STRIPE_PRICE_CONTRIBUTE_10 ?? '',
+      label: 'Every bit helps',
+      description: 'Contribute $10 to help Bags of Groceries Tasmania.',
+      amount: 1000,
+      bags: 0,
+      donationType: 'contribution',
+    },
     CONTRIBUTE_25: {
       id: 'CONTRIBUTE_25',
       priceId: process.env.STRIPE_PRICE_CONTRIBUTE_25 ?? '',
@@ -92,7 +105,14 @@ export function resolveDonationPriceId(
     if (tierId === 'CONTRIBUTE_25') {
       return getContribute25MonthlyPriceId()
     }
+    if (tierId === 'CONTRIBUTE_10') {
+      return undefined
+    }
     return getFamilyBagMonthlyPriceId()
+  }
+
+  if (tierId === 'CONTRIBUTE_10') {
+    return getContribute10PriceId()
   }
 
   if (tierId === 'CONTRIBUTE_25') {
@@ -128,6 +148,11 @@ export function getStripeConfigErrors(): string[] {
     errors.push('STRIPE_PRICE_FAMILY_BAG is missing')
   } else if (!process.env.STRIPE_PRICE_FAMILY_BAG.startsWith('price_')) {
     errors.push('STRIPE_PRICE_FAMILY_BAG must start with price_')
+  }
+
+  const contribute10 = process.env.STRIPE_PRICE_CONTRIBUTE_10
+  if (contribute10 && !contribute10.startsWith('price_')) {
+    errors.push('STRIPE_PRICE_CONTRIBUTE_10 must start with price_')
   }
 
   const contribute25 = process.env.STRIPE_PRICE_CONTRIBUTE_25

@@ -5,6 +5,7 @@ import { DonationForm } from '@/components/sponsor/donation-form'
 import { FB_PAGE_URL } from '@/lib/facebook'
 import { getTotalBagsDelivered } from '@/lib/donations'
 import {
+  getContribute10PriceId,
   getContribute25PriceId,
   getFamilyBagPriceId,
   getContribute25MonthlyPriceId,
@@ -15,13 +16,14 @@ import {
 
 export const metadata: Metadata = {
   title: 'Give a Bag of Groceries',
-  description: 'Give from $25 or sponsor a full $46.50 bag of groceries for a Tasmanian family doing it tough.',
+  description: 'Give from $10, $25, or sponsor a full $46.50 bag of groceries for a Tasmanian family doing it tough.',
 }
 
 export const dynamic = 'force-dynamic'
 
 export default async function SponsorPage() {
   const priceFamilyBagId = getFamilyBagPriceId() ?? ''
+  const priceContribute10Id = getContribute10PriceId()
   const priceContribute25Id = getContribute25PriceId()
   const priceFamilyBagMonthlyId = getFamilyBagMonthlyPriceId()
   const priceContribute25MonthlyId = getContribute25MonthlyPriceId()
@@ -84,6 +86,7 @@ export default async function SponsorPage() {
           <div className="card-dark p-6 sm:p-8">
             <DonationForm
               priceFamilyBagId={priceFamilyBagId}
+              priceContribute10Id={priceContribute10Id}
               priceContribute25Id={priceContribute25Id}
               priceFamilyBagMonthlyId={priceFamilyBagMonthlyId}
               priceContribute25MonthlyId={priceContribute25MonthlyId}

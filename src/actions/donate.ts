@@ -19,7 +19,7 @@ function tierIdFromPriceId(priceId: string): DonationTierId | undefined {
   const tier = getDonationTier(priceId)
   if (tier) return tier.id
 
-  for (const id of ['CONTRIBUTE_25', 'FAMILY_BAG'] as const) {
+  for (const id of ['CONTRIBUTE_10', 'CONTRIBUTE_25', 'FAMILY_BAG'] as const) {
     const monthly = resolveDonationTier(id, 'monthly')
     const oneTime = resolveDonationTier(id, 'one_time')
     if (monthly?.priceId === priceId || oneTime?.priceId === priceId) {
@@ -67,6 +67,14 @@ export async function createCheckoutSession(
     result.data
 
   const tierId = tierIdFromPriceId(priceId)
+  const isMonthly = givingFrequency === 'monthly'
+
+  if (isMonthly && tierId === 'CONTRIBUTE_10') {
+    return {
+      error: 'The $10 option is available for one-time gifts only. Choose one-time or pick another amount.',
+    }
+  }
+
   const tier = tierId
     ? resolveDonationTier(tierId, givingFrequency)
     : getDonationTier(priceId)
@@ -88,7 +96,6 @@ export async function createCheckoutSession(
 
   const bags = tier.bags * quantity
   const siteUrl = getSiteUrl()
-  const isMonthly = givingFrequency === 'monthly'
 
   const metadata = {
     first_name: firstName,

@@ -12,8 +12,15 @@ import type { DonationTierId, GivingFrequency } from '@/lib/stripe'
 
 const BAG_PRICE = 46.5
 const BAG_PRICE_LABEL = '$46.50'
-const CONTRIBUTE_PRICE = 25
+const CONTRIBUTE_10_PRICE = 10
+const CONTRIBUTE_25_PRICE = 25
 const MAX_BAGS = 1000
+
+function contributionAmount(tier: DonationTierId): number {
+  if (tier === 'CONTRIBUTE_10') return CONTRIBUTE_10_PRICE
+  if (tier === 'CONTRIBUTE_25') return CONTRIBUTE_25_PRICE
+  return 0
+}
 
 function formatBagAmount(amount: number): string {
   return `$${amount.toFixed(2)}`
@@ -82,6 +89,7 @@ function ProgressDial({ quantity }: { quantity: number }) {
 
 interface DonationFormProps {
   priceFamilyBagId: string
+  priceContribute10Id?: string
   priceContribute25Id?: string
   priceFamilyBagMonthlyId?: string
   priceContribute25MonthlyId?: string
@@ -100,6 +108,10 @@ function resolvePriceId(
     return props.priceFamilyBagMonthlyId ?? props.priceFamilyBagId
   }
 
+  if (tier === 'CONTRIBUTE_10' && props.priceContribute10Id) {
+    return props.priceContribute10Id
+  }
+
   if (tier === 'CONTRIBUTE_25' && props.priceContribute25Id) {
     return props.priceContribute25Id
   }
@@ -109,6 +121,7 @@ function resolvePriceId(
 export function DonationForm(props: DonationFormProps) {
   const {
     priceFamilyBagId,
+    priceContribute10Id,
     priceContribute25Id,
     monthlyGivingConfigured = false,
   } = props
@@ -121,8 +134,32 @@ export function DonationForm(props: DonationFormProps) {
 
   const isFullBag = selectedTier === 'FAMILY_BAG'
   const isMonthly = givingFrequency === 'monthly'
+  const showContribute10 = Boolean(priceContribute10Id) && !isMonthly
+  const tierColumnClass =
+    1 + (priceContribute25Id ? 1 : 0) + (showContribute10 ? 1 : 0) >= 3
+      ? 'sm:grid-cols-2 lg:grid-cols-3'
+      : priceContribute25Id || showContribute10
+        ? 'sm:grid-cols-2'
+        : ''
   const selectedPriceId = resolvePriceId(selectedTier, givingFrequency, props)
-  const total = isFullBag ? quantity * BAG_PRICE : CONTRIBUTE_PRICE
+  const total = isFullBag
+    ? quantity * BAG_PRICE
+    : contributionAmount(selectedTier)
+
+  function selectTier(tier: DonationTierId) {
+    setSelectedTier(tier)
+    if (tier === 'CONTRIBUTE_10') {
+      setGivingFrequency('one_time')
+    }
+  }
+
+  function selectMonthly() {
+    if (!monthlyGivingConfigured) return
+    if (selectedTier === 'CONTRIBUTE_10') {
+      setSelectedTier('FAMILY_BAG')
+    }
+    setGivingFrequency('monthly')
+  }
 
   function decrement() { setQuantity((q) => Math.max(1, q - 1)) }
   function increment() { setQuantity((q) => Math.min(MAX_BAGS, q + 1)) }
@@ -144,13 +181,16 @@ export function DonationForm(props: DonationFormProps) {
       if (isFullBag) {
         return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${formatBagAmount(total)}/month)`
       }
-      return `Give $${CONTRIBUTE_PRICE}/month`
+      return `Give $${CONTRIBUTE_25_PRICE}/month`
     }
 
     if (isFullBag) {
       return `Give ${quantity} ${quantity === 1 ? 'Bag' : 'Bags'} of Groceries (${formatBagAmount(total)})`
     }
-    return `Give $${CONTRIBUTE_PRICE} to Support the Program`
+    if (selectedTier === 'CONTRIBUTE_10') {
+      return 'Give $10 to Support the Program'
+    }
+    return `Give $${CONTRIBUTE_25_PRICE} to Support the Program`
   })()
 
   return (
@@ -190,7 +230,7 @@ export function DonationForm(props: DonationFormProps) {
 
           <button
             type="button"
-            onClick={() => monthlyGivingConfigured && setGivingFrequency('monthly')}
+            onClick={() => monthlyGivingConfigured && selectMonthly()}
             disabled={!monthlyGivingConfigured}
             className={`rounded-xl border p-4 text-left transition-colors ${
               givingFrequency === 'monthly'
@@ -217,10 +257,10 @@ export function DonationForm(props: DonationFormProps) {
       {/* Tier selection */}
       <div>
         <h2 className="mb-4 text-lg font-semibold text-white">Choose an amount</h2>
-        <div className={`grid gap-3 ${priceContribute25Id ? 'sm:grid-cols-2' : ''}`}>
+        <div className={`grid gap-3 ${tierColumnClass}`}>
           <button
             type="button"
-            onClick={() => setSelectedTier('FAMILY_BAG')}
+            onClick={() => selectTier('FAMILY_BAG')}
             className={`rounded-xl border p-4 text-left transition-colors ${
               selectedTier === 'FAMILY_BAG'
                 ? 'border-white bg-white/10'
@@ -243,7 +283,7 @@ export function DonationForm(props: DonationFormProps) {
           {priceContribute25Id ? (
             <button
               type="button"
-              onClick={() => setSelectedTier('CONTRIBUTE_25')}
+              onClick={() => selectTier('CONTRIBUTE_25')}
               className={`rounded-xl border p-4 text-left transition-colors ${
                 selectedTier === 'CONTRIBUTE_25'
                   ? 'border-[#A3C2B2] bg-[#163d27]/80'
@@ -260,6 +300,27 @@ export function DonationForm(props: DonationFormProps) {
               <p className="text-sm text-[#A3C2B2]">Support the program</p>
               <p className="mt-1 text-xs text-[#A3C2B2]/70">
                 Every dollar helps us reach more families.
+              </p>
+            </button>
+          ) : null}
+
+          {showContribute10 ? (
+            <button
+              type="button"
+              onClick={() => selectTier('CONTRIBUTE_10')}
+              className={`rounded-xl border p-4 text-left transition-colors ${
+                selectedTier === 'CONTRIBUTE_10'
+                  ? 'border-[#A3C2B2] bg-[#163d27]/80'
+                  : 'border-[#163d27] bg-[#163d27]/40 hover:bg-[#163d27]/60'
+              }`}
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <Heart className="h-4 w-4 text-[#A3C2B2]" />
+                <span className="font-semibold text-white">$10</span>
+              </div>
+              <p className="text-sm text-[#A3C2B2]">Every bit helps</p>
+              <p className="mt-1 text-xs text-[#A3C2B2]/70">
+                A small gift that adds up for Tasmanian families.
               </p>
             </button>
           ) : null}
