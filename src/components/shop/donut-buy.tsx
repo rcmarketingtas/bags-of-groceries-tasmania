@@ -7,17 +7,17 @@ import { startShopifyCheckout } from '@/actions/shopify-checkout'
 
 const MAX_QUANTITY = 20
 
-interface CaramelSliceBuyProps {
+interface DonutBuyProps {
   variantId: string
   availableForSale: boolean
   formattedPrice: string
 }
 
-export function CaramelSliceBuy({
+export function DonutBuy({
   variantId,
   availableForSale,
   formattedPrice,
-}: CaramelSliceBuyProps) {
+}: DonutBuyProps) {
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()

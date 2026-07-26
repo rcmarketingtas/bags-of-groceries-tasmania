@@ -7,11 +7,33 @@ function normalizeEnvValue(raw: string | undefined): string {
   return (raw ?? '').trim().replace(/^['"]|['"]$/g, '')
 }
 
-export function getShopProductHandle(): string {
-  return (
-    normalizeEnvValue(process.env.SHOPIFY_PRODUCT_HANDLE) ||
-    normalizeEnvValue(process.env.NEXT_PUBLIC_SHOPIFY_PRODUCT_HANDLE)
-  )
+export type ShopProductId = 'BOX_OF_6_ASSORTED' | 'BOX_OF_6_VANILLA_GLAZE'
+
+type ShopProductConfig = {
+  id: ShopProductId
+  /** Fallback label shown until the live Shopify title loads. */
+  label: string
+  envVarName: string
+}
+
+/** The donut boxes sold on /shop/donuts. Add more here to sell additional boxes. */
+export const SHOP_PRODUCTS: ShopProductConfig[] = [
+  {
+    id: 'BOX_OF_6_ASSORTED',
+    label: 'Box of 6 Assorted Donuts',
+    envVarName: 'SHOPIFY_PRODUCT_HANDLE_BOX_OF_6_ASSORTED',
+  },
+  {
+    id: 'BOX_OF_6_VANILLA_GLAZE',
+    label: 'Box of 6 Vanilla Glaze Donuts',
+    envVarName: 'SHOPIFY_PRODUCT_HANDLE_BOX_OF_6_VANILLA_GLAZE',
+  },
+]
+
+export function getShopProductHandle(id: ShopProductId): string {
+  const config = SHOP_PRODUCTS.find((p) => p.id === id)
+  if (!config) return ''
+  return normalizeEnvValue(process.env[config.envVarName])
 }
 
 export function getShopifyStoreDomain(): string {
@@ -28,7 +50,8 @@ export function getShopifyStorefrontToken(): string {
   )
 }
 
-export function getShopifyConfigErrors(): string[] {
+/** Domain + token only — enough to talk to Shopify, independent of which products are set up. */
+export function getShopifyCoreConfigErrors(): string[] {
   const errors: string[] = []
 
   if (!getShopifyStoreDomain()) {
@@ -37,8 +60,22 @@ export function getShopifyConfigErrors(): string[] {
   if (!getShopifyStorefrontToken()) {
     errors.push('SHOPIFY_STOREFRONT_ACCESS_TOKEN is missing')
   }
-  if (!getShopProductHandle()) {
-    errors.push('SHOPIFY_PRODUCT_HANDLE is missing')
+
+  return errors
+}
+
+export function isShopifyCoreConfigured(): boolean {
+  return getShopifyCoreConfigErrors().length === 0
+}
+
+/** Core errors plus any missing product handles — used for the full "everything is set up" banner. */
+export function getShopifyConfigErrors(): string[] {
+  const errors = getShopifyCoreConfigErrors()
+
+  for (const product of SHOP_PRODUCTS) {
+    if (!getShopProductHandle(product.id)) {
+      errors.push(`${product.envVarName} is missing`)
+    }
   }
 
   return errors
@@ -52,5 +89,5 @@ export function isShopifyConfigured(): boolean {
 export const SHOPIFY_ENV_NAMES = [
   'SHOPIFY_STORE_DOMAIN',
   'SHOPIFY_STOREFRONT_ACCESS_TOKEN',
-  'SHOPIFY_PRODUCT_HANDLE',
+  ...SHOP_PRODUCTS.map((p) => p.envVarName),
 ] as const

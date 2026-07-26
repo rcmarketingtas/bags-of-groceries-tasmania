@@ -37,7 +37,7 @@ export function Footer() {
             <Link href="/apply" className="transition-colors hover:text-white">Apply for Assistance</Link>
             <Link href="/about" className="transition-colors hover:text-white">About</Link>
             <Link href="/contact" className="transition-colors hover:text-white">Contact</Link>
-            <Link href="/shop/caramel-slices" className="transition-colors hover:text-white">Order Caramel Slice</Link>
+            <Link href="/shop/donuts" className="transition-colors hover:text-white">Order Donuts</Link>
           </nav>
         </div>
 

@@ -1,37 +1,56 @@
 import { NextResponse } from 'next/server'
 import {
+  SHOP_PRODUCTS,
   getShopProductHandle,
   getShopifyConfigErrors,
+  getShopifyCoreConfigErrors,
   getShopifyStoreDomain,
   getShopifyStorefrontToken,
-  isShopifyConfigured,
+  isShopifyCoreConfigured,
 } from '@/lib/shop-config'
-import { fetchCaramelSliceProduct } from '@/lib/shopify'
+import { fetchShopProduct } from '@/lib/shopify'
 
 /** Debug Shopify env + live product fetch (never exposes secrets). */
 export async function GET() {
-  const productResult = isShopifyConfigured()
-    ? await fetchCaramelSliceProduct()
-    : null
+  const coreConfigured = isShopifyCoreConfigured()
+
+  const products = await Promise.all(
+    SHOP_PRODUCTS.map(async (product) => {
+      const handle = getShopProductHandle(product.id)
+      if (!coreConfigured || !handle) {
+        return {
+          id: product.id,
+          envVarName: product.envVarName,
+          handlePresent: Boolean(handle),
+          result: null as null | { ok: true; title: string; price: string; currency: string } | { ok: false; error: string },
+        }
+      }
+      const productResult = await fetchShopProduct(handle)
+      return {
+        id: product.id,
+        envVarName: product.envVarName,
+        handlePresent: true,
+        result: productResult.ok
+          ? {
+              ok: true as const,
+              title: productResult.product.title,
+              price: productResult.product.priceAmount,
+              currency: productResult.product.currencyCode,
+            }
+          : { ok: false as const, error: productResult.error },
+      }
+    }),
+  )
 
   return NextResponse.json({
-    configured: isShopifyConfigured(),
+    configured: getShopifyConfigErrors().length === 0,
     missing: getShopifyConfigErrors(),
     present: {
       storeDomain: Boolean(getShopifyStoreDomain()),
       storefrontToken: Boolean(getShopifyStorefrontToken()),
-      productHandle: Boolean(getShopProductHandle()),
     },
-    product: productResult
-      ? productResult.ok
-        ? {
-            ok: true,
-            title: productResult.product.title,
-            price: productResult.product.priceAmount,
-            currency: productResult.product.currencyCode,
-          }
-        : { ok: false, error: productResult.error }
-      : null,
+    coreConfigErrors: getShopifyCoreConfigErrors(),
+    products,
     hint: 'After adding env vars in Vercel, redeploy production.',
   })
 }

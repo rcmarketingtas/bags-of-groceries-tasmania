@@ -32,7 +32,7 @@ export default async function ThankYouPage({ searchParams }: Props) {
               Thank You for Your Order
             </h1>
             <p className="text-lg text-[#A3C2B2]">
-              Your caramel slice order has been received. We&apos;ll be in touch
+              Your donut order has been received. We&apos;ll be in touch
               about local delivery.
             </p>
           </div>
@@ -64,9 +64,9 @@ export default async function ThankYouPage({ searchParams }: Props) {
                 size="lg"
                 className="btn-glow bg-[#1c4d31] text-white hover:bg-[#163d27]"
               >
-                <Link href="/shop/caramel-slices">
+                <Link href="/shop/donuts">
                   <Cake className="h-4 w-4" />
-                  Order More Slices
+                  Order More Donuts
                 </Link>
               </Button>
               <Button

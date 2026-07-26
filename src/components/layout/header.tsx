@@ -12,7 +12,7 @@ const baseNavLinks = [
   { href: '/contact', label: 'Contact' },
 ]
 
-const shopNavLink = { href: '/shop/caramel-slices', label: 'Order Caramel Slice' }
+const shopNavLink = { href: '/shop/donuts', label: 'Order Donuts' }
 
 const navLinks = [...baseNavLinks, shopNavLink]
 

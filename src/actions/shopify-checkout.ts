@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers'
 import { createShopifyCheckout } from '@/lib/shopify'
-import { getShopifyConfigErrors } from '@/lib/shop-config'
+import { getShopifyCoreConfigErrors } from '@/lib/shop-config'
 import { rateLimit } from '@/lib/rate-limit'
 
 const MAX_QUANTITY = 20
@@ -10,7 +10,7 @@ const MAX_QUANTITY = 20
 export async function startShopifyCheckout(
   formData: FormData,
 ): Promise<{ url?: string; error?: string }> {
-  const configErrors = getShopifyConfigErrors()
+  const configErrors = getShopifyCoreConfigErrors()
   if (configErrors.length > 0) {
     return {
       error: `Shop is not configured yet: ${configErrors.join(', ')}`,

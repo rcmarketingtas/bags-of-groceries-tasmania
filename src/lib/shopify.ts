@@ -1,10 +1,9 @@
 import { getSiteUrl } from '@/lib/site-url'
 import {
-  getShopProductHandle,
-  getShopifyConfigErrors,
+  getShopifyCoreConfigErrors,
   getShopifyStoreDomain,
   getShopifyStorefrontToken,
-  isShopifyConfigured,
+  isShopifyCoreConfigured,
 } from '@/lib/shop-config'
 
 const STOREFRONT_API_VERSION = '2024-10'
@@ -119,13 +118,15 @@ type ProductByHandleData = {
   } | null
 }
 
-export async function fetchCaramelSliceProduct(): Promise<ShopifyProductResult> {
-  if (!isShopifyConfigured()) {
-    return { ok: false, error: getShopifyConfigErrors().join(', ') }
+export async function fetchShopProduct(handle: string): Promise<ShopifyProductResult> {
+  if (!isShopifyCoreConfigured()) {
+    return { ok: false, error: getShopifyCoreConfigErrors().join(', ') }
+  }
+  if (!handle) {
+    return { ok: false, error: 'Product handle is missing.' }
   }
 
   try {
-    const handle = getShopProductHandle()
     const data = await storefrontFetch<ProductByHandleData>(PRODUCT_BY_HANDLE_QUERY, {
       handle,
     })
@@ -167,12 +168,6 @@ export async function fetchCaramelSliceProduct(): Promise<ShopifyProductResult> 
   }
 }
 
-/** @deprecated use fetchCaramelSliceProduct */
-export async function getCaramelSliceProduct(): Promise<ShopifyProduct | null> {
-  const result = await fetchCaramelSliceProduct()
-  return result.ok ? result.product : null
-}
-
 const CART_CREATE_MUTATION = `
   mutation CartCreate($lines: [CartLineInput!]!) {
     cartCreate(input: { lines: $lines }) {
@@ -198,8 +193,8 @@ export async function createShopifyCheckout(
   variantId: string,
   quantity: number,
 ): Promise<{ checkoutUrl: string }> {
-  if (!isShopifyConfigured()) {
-    throw new Error(`Shopify is not configured: ${getShopifyConfigErrors().join(', ')}`)
+  if (!isShopifyCoreConfigured()) {
+    throw new Error(`Shopify is not configured: ${getShopifyCoreConfigErrors().join(', ')}`)
   }
 
   const data = await storefrontFetch<CartCreateData>(CART_CREATE_MUTATION, {
