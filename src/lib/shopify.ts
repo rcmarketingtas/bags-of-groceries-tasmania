@@ -189,16 +189,20 @@ type CartCreateData = {
   }
 }
 
+export type CheckoutLine = { variantId: string; quantity: number }
+
 export async function createShopifyCheckout(
-  variantId: string,
-  quantity: number,
+  lines: CheckoutLine[],
 ): Promise<{ checkoutUrl: string }> {
   if (!isShopifyCoreConfigured()) {
     throw new Error(`Shopify is not configured: ${getShopifyCoreConfigErrors().join(', ')}`)
   }
 
   const data = await storefrontFetch<CartCreateData>(CART_CREATE_MUTATION, {
-    lines: [{ merchandiseId: variantId, quantity }],
+    lines: lines.map((line) => ({
+      merchandiseId: line.variantId,
+      quantity: line.quantity,
+    })),
   })
 
   const { cart, userErrors } = data.cartCreate

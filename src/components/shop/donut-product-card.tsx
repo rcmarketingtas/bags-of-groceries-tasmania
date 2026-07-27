@@ -80,11 +80,15 @@ export function DonutProductCard({ label, product, error }: Props) {
       {product && (
         <DonutBuy
           variantId={product.variantId}
+          title={product.title}
           availableForSale={product.availableForSale}
           formattedPrice={formatShopifyPrice(
             product.priceAmount,
             product.currencyCode,
           )}
+          unitPriceAmount={product.priceAmount}
+          currencyCode={product.currencyCode}
+          imageUrl={product.featuredImage?.url ?? null}
         />
       )}
     </div>

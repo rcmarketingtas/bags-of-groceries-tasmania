@@ -1,43 +1,41 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { Loader2, AlertCircle, Minus, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Minus, Plus, ShoppingCart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { startShopifyCheckout } from '@/actions/shopify-checkout'
+import { useCart } from '@/components/shop/cart-context'
 
 const MAX_QUANTITY = 20
+const ADDED_FEEDBACK_MS = 1500
 
 interface DonutBuyProps {
   variantId: string
+  title: string
   availableForSale: boolean
   formattedPrice: string
+  unitPriceAmount: string
+  currencyCode: string
+  imageUrl?: string | null
 }
 
 export function DonutBuy({
   variantId,
+  title,
   availableForSale,
   formattedPrice,
+  unitPriceAmount,
+  currencyCode,
+  imageUrl,
 }: DonutBuyProps) {
+  const { addItem } = useCart()
   const [quantity, setQuantity] = useState(1)
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const [justAdded, setJustAdded] = useState(false)
 
-  function handleBuy() {
-    setError(null)
-    const formData = new FormData()
-    formData.set('variantId', variantId)
-    formData.set('quantity', String(quantity))
-
-    startTransition(async () => {
-      const result = await startShopifyCheckout(formData)
-      if (result.error) {
-        setError(result.error)
-        return
-      }
-      if (result.url) {
-        window.location.href = result.url
-      }
-    })
+  function handleAddToCart() {
+    addItem({ variantId, title, unitPriceAmount, currencyCode, imageUrl }, quantity)
+    setQuantity(1)
+    setJustAdded(true)
+    setTimeout(() => setJustAdded(false), ADDED_FEEDBACK_MS)
   }
 
   if (!availableForSale) {
@@ -76,34 +74,24 @@ export function DonutBuy({
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          {error}
-        </div>
-      )}
-
       <Button
         type="button"
         size="lg"
         className="btn-glow w-full bg-[#1c4d31] text-white hover:bg-[#163d27]"
-        disabled={isPending}
-        onClick={handleBuy}
+        onClick={handleAddToCart}
       >
-        {isPending ? (
+        {justAdded ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Going to checkout...
+            <Check className="h-4 w-4" />
+            Added to cart
           </>
         ) : (
-          `Buy Now — ${formattedPrice}`
+          <>
+            <ShoppingCart className="h-4 w-4" />
+            Add to Cart — {formattedPrice}
+          </>
         )}
       </Button>
-
-      <p className="text-center text-xs text-[#1c4d31]/60">
-        Secure checkout powered by Shopify. Local delivery in Launceston and
-        nearby suburbs, within 7 days of ordering.
-      </p>
     </div>
   )
 }
